@@ -1,0 +1,1147 @@
+<title>RE-BAT Solar Twin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a one-line power diagram as the hero, an instrument strip under it, then trends, the rig's measurements, and the lifetime study. */
+:root {
+  --bg: #edf1f3; --surface: #ffffff; --surface-2: #e3e9ed; --ink: #142231; --muted: #586979; --line: #cdd7de;
+  --sun: #c97c06; --charge: #0b8a70; --load: #3d5bd6; --heat: #cf3f36;
+  --ok: #1d8a4f; --warn: #b86e00; --crit: #c42b2b;
+  --scene-ground: #26323d; --scene-ground-2: #1f2a33; --chip: rgba(255,255,255,.92); --chip-ink: #142231;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e151d; --surface: #151f29; --surface-2: #1c2834; --ink: #e5ecf2; --muted: #92a3b3; --line: #293846;
+  --sun: #f0a634; --charge: #2fc39f; --load: #8197ff; --heat: #ff6e64;
+  --ok: #45c47c; --warn: #f0a634; --crit: #ff6b6b;
+  --scene-ground: #1a242d; --scene-ground-2: #141c24; --chip: rgba(18,27,36,.9); --chip-ink: #e5ecf2; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e151d; --surface: #151f29; --surface-2: #1c2834; --ink: #e5ecf2; --muted: #92a3b3; --line: #293846;
+  --sun: #f0a634; --charge: #2fc39f; --load: #8197ff; --heat: #ff6e64;
+  --ok: #45c47c; --warn: #f0a634; --crit: #ff6b6b;
+  --scene-ground: #1a242d; --scene-ground-2: #141c24; --chip: rgba(18,27,36,.9); --chip-ink: #e5ecf2; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 18px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+h1 { font-size: 30px; line-height: 1.05; }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; }
+.eyebrow { font: 500 11px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.muted { color: var(--muted); }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--charge); outline-offset: 2px; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; }
+.title { display: grid; gap: 6px; min-width: 0; }
+.clock { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.clock .hh { font: 600 40px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-weight: 500; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 7px 10px; font: 500 12px var(--f-mono); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 -2px 0 var(--charge); }
+select.sel { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 8px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font: 500 12px var(--f-mono);
+  border: 1px solid currentColor; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.s-charge { color: var(--charge); } .s-dis { color: var(--load); } .s-full { color: var(--ok); }
+.s-warn { color: var(--warn); } .s-crit { color: var(--crit); } .s-idle { color: var(--muted); }
+
+/* scene */
+.scene { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.scene-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.scene-scroll { overflow-x: auto; }
+.scene svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.scene text { font-family: var(--f-mono); }
+.chip-bg { fill: var(--chip); }
+.chip-tx { fill: var(--chip-ink); font-size: 13px; }
+.chip-sm { fill: var(--chip-ink); font-size: 11px; opacity: .8; }
+
+/* tiles */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tile { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.tile .v { font: 600 26px/1.05 var(--f-display); font-variant-numeric: tabular-nums; }
+.tile .v small { font: 500 13px var(--f-mono); color: var(--muted); margin-left: 3px; }
+.tile .sub { font: 12px var(--f-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--charge); transition: width .3s; }
+
+/* panels */
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; }
+.grid3 { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font: 12px var(--f-mono); color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 3px; margin-right: 5px; vertical-align: middle; background: var(--c); }
+canvas.chart { width: 100%; height: 190px; display: block; }
+canvas.chart.short { height: 150px; }
+canvas.chart.tall { height: 260px; }
+
+/* form */
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 12px; color: var(--muted); }
+.field input, .field select { width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; background: var(--bg); font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.fs-title { grid-column: 1 / -1; margin-top: 4px; }
+.derived { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 18px; font: 12px var(--f-mono); padding: 8px 10px; background: var(--surface-2); border-radius: 7px; }
+.derived b { font-weight: 500; color: var(--ink); }
+.err { color: var(--crit); font-size: 13px; }
+
+/* log & table */
+.log { font: 12px/1.5 var(--f-mono); max-height: 260px; overflow-y: auto; display: grid; gap: 2px; }
+.log div { display: grid; grid-template-columns: 92px 1fr; gap: 8px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
+.log .k-protect { color: var(--crit); } .log .k-load { color: var(--load); } .log .k-day { color: var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font: 12px var(--f-mono); font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+pre.json { margin: 0; font: 12px/1.5 var(--f-mono); background: var(--surface-2); border-radius: 7px; padding: 10px 12px; overflow-x: auto; }
+
+/* lifetime */
+.lt-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lt-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; }
+.lt-card .big { font: 600 28px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.lt-card .lab { font-size: 12px; display: flex; gap: 6px; align-items: center; }
+.lt-card .lab::before { content: ""; width: 12px; height: 3px; background: var(--c); }
+.lt-card dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 2px 10px; font: 12px var(--f-mono); }
+.lt-card dt { color: var(--muted); } .lt-card dd { margin: 0; text-align: right; }
+.progress { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--sun); }
+
+.flowline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.flowline div { padding: 12px 14px; border-right: 1px solid var(--line); display: grid; gap: 3px; min-width: 0; }
+.flowline div:last-child { border-right: 0; }
+.flowline .n { font: 500 11px var(--f-mono); color: var(--muted); }
+.flowline b { font-family: var(--f-display); font-weight: 600; font-size: 16px; }
+.flowline p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.flowline .here { background: var(--surface-2); box-shadow: inset 0 3px 0 var(--sun); }
+
+.engine-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.engine-row input { flex: 1 1 220px; min-width: 0; border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; background: var(--bg); font-family: var(--f-mono); }
+
+@media (max-width: 980px) { .grid3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .grid3 > :first-child { grid-column: 1 / -1; } }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } .flowline { grid-template-columns: minmax(0, 1fr); } .flowline div { border-right: 0; border-bottom: 1px solid var(--line); } .lt-cards { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid3 { grid-template-columns: minmax(0, 1fr); } h1 { font-size: 25px; } .clock .hh { font-size: 32px; } .form { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="title">
+      <span class="eyebrow">RE-BAT AI · second-life storage twin</span>
+      <h1>Solar into a retired EV battery</h1>
+      <span class="muted" id="siteLine">Kavaraipettai / Chennai · lat 13.08° N · driven by the rig's measurements</span>
+    </div>
+    <div class="clock">
+      <span class="hh mono" id="clk">06:00</span>
+      <span class="mono muted" id="clkDate">2026-10-14 · day 1</span>
+      <span class="pill s-idle" id="modePill">Idle</span>
+    </div>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Simulation controls">
+    <button class="btn primary" id="playBtn" aria-pressed="true">Pause</button>
+    <div class="seg" id="speedSeg" aria-label="Simulation speed">
+      <button data-s="60">1 min/s</button><button data-s="600" aria-pressed="true">10 min/s</button><button data-s="3600">1 h/s</button><button data-s="14400">4 h/s</button><button data-s="86400">1 day/s</button>
+    </div>
+    <label class="muted" for="weatherSel" style="font-size:12px">Weather</label>
+    <select class="sel" id="weatherSel">
+      <option value="auto">Seasonal (auto)</option><option value="clear">Clear</option><option value="partly">Partly cloudy</option>
+      <option value="cloudy">Overcast</option><option value="monsoon">Monsoon rain</option>
+    </select>
+    <button class="btn" id="skipBtn" title="Jump the twin forward to the next sunset">Skip to 18:00</button>
+    <button class="btn" id="resetBtn">Restart</button>
+  </div>
+
+  <section class="scene" aria-label="Live energy flow">
+    <div class="scene-head">
+      <h2>Live energy flow</h2>
+      <div class="legend">
+        <span style="--c:var(--sun)">PV energy</span><span style="--c:var(--charge)">into battery</span><span style="--c:var(--load)">to load</span>
+      </div>
+    </div>
+    <div class="scene-scroll"><svg id="scene" viewBox="0 0 1000 470" role="img" aria-label="Sun, solar panel, charge controller, second-life battery and street light with animated power flows"></svg></div>
+  </section>
+
+  <section class="tiles" aria-label="Live readings">
+    <div class="tile"><span class="eyebrow">Solar in</span><span class="v" id="tPv">0<small>W</small></span><span class="sub" id="tPvS">0 W/m² · 0 W curtailed</span></div>
+    <div class="tile"><span class="eyebrow">Battery terminal</span><span class="v" id="tVb">0<small>V</small></span><span class="sub" id="tVbS">0 A</span></div>
+    <div class="tile"><span class="eyebrow">State of charge</span><span class="v" id="tSoc">0<small>%</small></span><div class="bar"><i id="tSocBar"></i></div></div>
+    <div class="tile"><span class="eyebrow">Battery temperature</span><span class="v" id="tTb">0<small>°C</small></span><span class="sub" id="tTbS">ambient 0 °C</span></div>
+    <div class="tile"><span class="eyebrow">State of health</span><span class="v" id="tSoh">0<small>%</small></span><span class="sub" id="tSohS">0 Ah · 0 mΩ</span></div>
+    <div class="tile"><span class="eyebrow">Night autonomy</span><span class="v" id="tAut">0<small>h</small></span><span class="sub" id="tAutS">0 Wh usable above LVD</span></div>
+    <div class="tile"><span class="eyebrow">Today</span><span class="v" id="tDay">0<small>Wh in</small></span><span class="sub" id="tDayS">0 Wh to light · 100 % served</span></div>
+    <div class="tile"><span class="eyebrow">Remaining second life</span><span class="v" id="tRul">…<small>yr</small></span><span class="sub" id="tRulS">to 60 % SOH, at today's fade rate</span></div>
+  </section>
+
+  <section class="grid3">
+    <div class="panel">
+      <div class="panel-head"><h3>Power, last 48 hours</h3>
+        <div class="legend"><span style="--c:var(--sun)">PV</span><span style="--c:var(--load)">load</span><span style="--c:var(--charge)">battery (+charge / −discharge)</span></div></div>
+      <canvas class="chart" id="cPow"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>State of charge</h3></div>
+      <canvas class="chart" id="cSoc"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Temperatures</h3>
+        <div class="legend"><span style="--c:var(--heat)">battery</span><span style="--c:var(--muted)">ambient</span></div></div>
+      <canvas class="chart" id="cTmp"></canvas>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <form class="panel" id="measForm" novalidate>
+      <div class="panel-head"><h2>Measured battery</h2><span class="eyebrow">from the RE-BAT rig</span></div>
+      <p class="muted" style="margin:0">Enter what the rig measured on the retired pack. The twin uses these numbers for capacity, voltage sag, heating and ageing.</p>
+      <div class="form">
+        <div class="field" style="grid-column:1/-1"><label for="fPreset">Start from</label>
+          <select id="fPreset"></select></div>
+        <div class="field"><label for="fChem">Chemistry</label><select id="fChem"><option>NMC</option><option>LFP</option></select></div>
+        <div class="field"><label for="fNs">Cells in series</label><input id="fNs" type="number" min="1" max="200" step="1"></div>
+        <div class="field"><label for="fNom">Nameplate capacity (Ah)</label><input id="fNom" type="number" min="0.1" step="0.1"></div>
+        <div class="field"><label for="fMeas">Measured capacity (Ah)</label><input id="fMeas" type="number" min="0.1" step="0.01"></div>
+        <div class="field"><label for="fIr">Pack DC resistance (mΩ)</label><input id="fIr" type="number" min="1" step="0.1"></div>
+        <div class="field"><label for="fSpread">Cell spread at rest (mV)</label><input id="fSpread" type="number" min="0" step="1"></div>
+        <div class="field"><label for="fCyc">Cycle count so far</label><input id="fCyc" type="number" min="0" step="1"></div>
+        <div class="field"><label for="fSoc">Start SOC (%)</label><input id="fSoc" type="number" min="0" max="100" step="1"></div>
+        <h3 class="fs-title">Solar system</h3>
+        <div class="field"><label for="fPv">Panel rating (W)</label><input id="fPv" type="number" min="0" step="1"></div>
+        <div class="field"><label for="fLed">Light at full power (W)</label><input id="fLed" type="number" min="0" step="0.05"></div>
+        <div class="field"><label for="fBase">ESP32 node, always on (W)</label><input id="fBase" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="fVcv">Charge stop voltage (V/cell)</label><input id="fVcv" type="number" min="2.5" max="4.25" step="0.01"></div>
+        <div class="field"><label for="fGain">Battery box solar heating (°C)</label><input id="fGain" type="number" min="0" max="30" step="0.5"></div>
+        <div class="field"><label for="fEol">End of second life (SOH %)</label><input id="fEol" type="number" min="30" max="90" step="1"></div>
+        <div class="derived" id="derived"></div>
+      </div>
+      <div class="err" id="formErr" role="alert" hidden></div>
+      <div class="controls"><button class="btn primary" type="submit">Apply measurements and restart</button></div>
+    </form>
+
+    <div style="display:grid; gap:18px; align-content:start; min-width:0">
+      <div class="panel">
+        <div class="panel-head"><h3>Controller log</h3><span class="eyebrow" id="logCount">0 events</span></div>
+        <div class="log" id="log" aria-live="polite"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Daily record</h3><span class="eyebrow">last 7 days</span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Sky</th><th>PV Wh</th><th>Light Wh</th><th>Served</th><th>SOC min</th><th>T max</th></tr></thead><tbody id="days"><tr><td colspan="7" class="muted" style="text-align:left">The first day closes at midnight, sim time.</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="ltH">
+    <div class="panel-head"><h2 id="ltH">Lifetime model</h2>
+      <div class="controls"><button class="btn primary" id="ltBtn">Run lifetime projection</button></div></div>
+    <p class="muted" style="margin:0">Runs this battery day after day through Chennai's seasons (15-minute steps) until it reaches end of second life. Three charging strategies, same measured pack.</p>
+    <div class="progress" aria-hidden="true"><i id="ltProg"></i></div>
+    <canvas class="chart tall" id="cLife"></canvas>
+    <div class="lt-cards" id="ltCards"></div>
+    <p class="muted" style="margin:0; font-size:12px">Ageing coefficients are literature-order values for aged NMC/LFP, not fitted to this pack. Re-measure capacity on the rig every few months and enter it here to recalibrate. CO₂ uses India's grid factor of about 0.71 kg/kWh.</p>
+  </section>
+
+  <section style="display:grid; gap:10px">
+    <h2>Where this sits in RE-BAT AI</h2>
+    <div class="flowline">
+      <div><span class="n">1 · Rig</span><b>Measure</b><p>ESP32 logs V, I, T and cell taps through REST → pulse → discharge.</p></div>
+      <div><span class="n">2 · XGBoost</span><b>SOH + RUL</b><p>Model estimates health with a calibrated interval.</p></div>
+      <div><span class="n">3 · Router</span><b>Second-life fit</b><p>Solar storage and street lighting scored against requirements.</p></div>
+      <div class="here"><span class="n">4 · This twin</span><b>Prove the use</b><p>Measured pack runs a solar system live and over its lifetime.</p></div>
+      <div><span class="n">5 · End of life</span><b>Recycle</b><p>At the SOH limit the pack moves to mineral recovery.</p></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><h3>Live reading in RE-BAT's canonical schema</h3><span class="eyebrow">feeds /hardware/ingest</span></div>
+        <pre class="json" id="canon"></pre>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Engine</h3><span class="eyebrow" id="engState">in-browser</span></div>
+        <p class="muted" style="margin:0">The twin runs here in your browser. To drive the page from the Python service instead, start <span class="mono">solar_demo_server.py</span> and connect.</p>
+        <div class="engine-row">
+          <input id="beUrl" type="url" value="http://localhost:8000" aria-label="Backend URL">
+          <button class="btn" id="beBtn">Connect to backend</button>
+        </div>
+        <div class="muted" id="beMsg" style="font-size:12px"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* RE-BAT AI · Solar → second-life battery twin (browser engine).
+   Line-for-line port of backend/app/services/solar_sim.py so the dashboard can
+   run on its own; the Python service is the reference implementation. */
+(function (root) {
+  "use strict";
+  const R_GAS = 8.314, T_REF_K = 298.15, GRID_CO2 = 0.71;
+  const OCV_SOC = [0, .05, .10, .20, .30, .40, .50, .60, .70, .80, .90, 1.0];
+  const CHEM = {
+    NMC: { ocv: [3.00, 3.30, 3.45, 3.55, 3.62, 3.67, 3.72, 3.79, 3.87, 3.95, 4.05, 4.18],
+           v_cv_cell: 4.10, v_min_cell: 3.20, wh_per_kg: 200, cal_fade_per_year: 0.012, cyc_fade_per_efc: 0.00018 },
+    LFP: { ocv: [2.80, 3.05, 3.18, 3.24, 3.27, 3.29, 3.30, 3.31, 3.32, 3.33, 3.35, 3.55],
+           v_cv_cell: 3.50, v_min_cell: 2.90, wh_per_kg: 150, cal_fade_per_year: 0.008, cyc_fade_per_efc: 0.00008 },
+  };
+  const TEMPS = [[21, 29], [22, 31], [24, 33], [27, 35], [28, 38], [28, 37], [27, 35], [26, 34], [26, 34], [25, 32], [23, 30], [22, 29]];
+  const SEASON = { 1: [.60, .30, .10, 0], 2: [.65, .28, .07, 0], 3: [.60, .32, .08, 0], 4: [.50, .40, .10, 0], 5: [.50, .40, .10, 0],
+    6: [.30, .45, .22, .03], 7: [.15, .45, .35, .05], 8: [.15, .45, .35, .05], 9: [.15, .45, .33, .07], 10: [.10, .35, .30, .25],
+    11: [.08, .30, .30, .32], 12: [.15, .35, .30, .20] };
+  const KINDS = ["clear", "partly", "cloudy", "monsoon"];
+  const CLOUD = { clear: [.96, .03, 1800], partly: [.72, .22, 900], cloudy: [.42, .14, 1500], monsoon: [.20, .09, 2400] };
+
+  function defaults() {
+    return {
+      panel: { rated_w: 100, vmp: 18, temp_coeff: -0.004, noct: 45, derate: 0.88, poa_factor: 1.0 },
+      pack: { chemistry: "NMC", series_cells: 4, nominal_capacity_ah: 30, measured_capacity_ah: 23.4,
+              internal_resistance_mohm: 48, cell_spread_mv: 18, cycle_count: 820, initial_soc: 0.55 },
+      load: { led_w: 12, on_hour: 18, off_hour: 6, dim_start: 23, dim_end: 5, dim_level: 0.5, base_w: 0.6 },
+      ctrl: { mppt_eff: 0.96, charge_c_rate: 0.30, max_charge_a: 15, max_discharge_c: 0.5, taper_c: 0.03, v_cv_cell: null,
+              soc_lvd: 0.10, soc_reconnect: 0.25, t_charge_min: 0, t_charge_max: 45, t_derate_start: 40, t_discharge_max: 55 },
+      site: { name: "Kavaraipettai / Chennai", latitude: 13.08, weather: "auto", enclosure_solar_gain_c: 8,
+              start_date: "2026-10-14", start_hour: 6 },
+      ageing: { eol_soh: 0.60, ea_cyc: 31500, ea_cal: 50000, knee_soh: 0.70, knee_gain: 6, r_growth: 2.5 },
+    };
+  }
+  function merge(over) {
+    const c = defaults();
+    for (const k in over || {}) if (c[k] && over[k]) Object.assign(c[k], over[k]);
+    return c;
+  }
+  const PRESETS = {
+    ev_module_streetlight: { label: "Retired EV module · 4S NMC 30 Ah · 100 W panel · 12 W street light", config: {} },
+    rig_cell_demo: { label: "Rig test cell · 1S 18650 · 6 W panel · 0.35 W LED (bench demo)", config: {
+      panel: { rated_w: 6, vmp: 6 },
+      pack: { chemistry: "NMC", series_cells: 1, nominal_capacity_ah: 3.0, measured_capacity_ah: 2.3, internal_resistance_mohm: 70,
+              cell_spread_mv: 0, cycle_count: 600, initial_soc: 0.5 },
+      load: { led_w: 0.35, base_w: 0.08 }, ctrl: { max_charge_a: 1.0 } } },
+    household_lfp: { label: "Retired LFP pack · 8S 50 Ah · 300 W panel · 40 W household lights + fan", config: {
+      panel: { rated_w: 300, vmp: 31 },
+      pack: { chemistry: "LFP", series_cells: 8, nominal_capacity_ah: 50, measured_capacity_ah: 41, internal_resistance_mohm: 32,
+              cell_spread_mv: 25, cycle_count: 1500, initial_soc: 0.6 },
+      load: { led_w: 40, on_hour: 18, off_hour: 6, dim_start: 22, dim_end: 5, dim_level: 0.35, base_w: 1.0 },
+      ctrl: { max_charge_a: 25 } } },
+  };
+
+  function validate(c) {
+    const p = c.pack;
+    if (!CHEM[p.chemistry]) throw new Error("Chemistry must be NMC or LFP.");
+    if (!(p.series_cells >= 1 && p.series_cells <= 200)) throw new Error("Series cells must be between 1 and 200.");
+    if (!(p.nominal_capacity_ah > 0 && p.measured_capacity_ah > 0)) throw new Error("Capacities must be greater than 0 Ah.");
+    if (!(p.internal_resistance_mohm > 0)) throw new Error("Internal resistance must be greater than 0 mΩ.");
+    if (!(p.initial_soc >= 0 && p.initial_soc <= 1)) throw new Error("Start SOC must be between 0 and 100 %.");
+    if (c.panel.rated_w < 0 || c.load.led_w < 0) throw new Error("Powers cannot be negative.");
+  }
+
+  function interp(x, xs, ys) {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+    for (let i = 1; i < xs.length; i++) if (x <= xs[i]) {
+      const f = (x - xs[i - 1]) / (xs[i] - xs[i - 1]); return ys[i - 1] + f * (ys[i] - ys[i - 1]);
+    }
+    return ys[ys.length - 1];
+  }
+  const ocvCell = (soc, chem) => interp(soc, OCV_SOC, CHEM[chem].ocv);
+  const socFromOcv = (v, chem) => interp(v, CHEM[chem].ocv, OCV_SOC);
+  const rad = (d) => d * Math.PI / 180;
+  function decl(doy) { return rad(23.45) * Math.sin(rad(360 / 365 * (284 + doy))); }
+  function sunSinAlt(lat, doy, hour) {
+    const d = decl(doy), la = rad(lat), w = rad(15 * (hour - 12));
+    return Math.sin(la) * Math.sin(d) + Math.cos(la) * Math.cos(d) * Math.cos(w);
+  }
+  function sunTimes(lat, doy) {
+    const x = -Math.tan(rad(lat)) * Math.tan(decl(doy));
+    const w0 = Math.acos(Math.max(-1, Math.min(1, x))) * 180 / Math.PI / 15;
+    return [12 - w0, 12 + w0];
+  }
+  const clearSky = (s) => s <= 0.01 ? 0 : 1098 * s * Math.exp(-0.057 / s);
+  function ambient(month, hour, weather) {
+    let [tmin, tmax] = TEMPS[month - 1];
+    if (weather === "monsoon") tmax -= 4; else if (weather === "cloudy") tmax -= 2;
+    let f;
+    if (hour >= 6 && hour <= 15) f = (1 - Math.cos(Math.PI * (hour - 6) / 9)) / 2;
+    else { const h = hour > 15 ? hour - 15 : hour + 9; f = (1 + Math.cos(Math.PI * h / 15)) / 2; }
+    return tmin + (tmax - tmin) * f;
+  }
+  function inWin(h, s, e) { return s <= e ? (h >= s && h < e) : (h >= s || h < e); }
+  function loadDemand(hour, L) {
+    let p = L.base_w;
+    if (inWin(hour, L.on_hour, L.off_hour)) p += L.led_w * (inWin(hour, L.dim_start, L.dim_end) ? L.dim_level : 1);
+    return p;
+  }
+  function rng(seed) {
+    let a = (seed >>> 0) || 1, spare = null;
+    const u = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    u.gauss = () => { if (spare !== null) { const s = spare; spare = null; return s; }
+      let x, y, r; do { x = 2 * u() - 1; y = 2 * u() - 1; r = x * x + y * y; } while (r >= 1 || r === 0);
+      const m = Math.sqrt(-2 * Math.log(r) / r); spare = y * m; return x * m; };
+    return u;
+  }
+  const r2 = (v, n) => { const f = Math.pow(10, n); return Math.round(v * f) / f; };
+
+  class Twin {
+    constructor(cfgIn, seed = 7, logEvents = true) {
+      const cfg = merge(JSON.parse(JSON.stringify(cfgIn || {})));
+      validate(cfg);
+      this.cfg = cfg; this.rand = rng(seed); this.k = 0.9; this.chem = CHEM[cfg.pack.chemistry];
+      const p = cfg.pack;
+      const [y, m, d] = cfg.site.start_date.split("-").map(Number);
+      this.date0 = Date.UTC(y, m - 1, d);
+      this.t = 0;
+      this.soc = p.initial_soc; this.soh = this.soh0 = Math.max(0.05, Math.min(1.2, p.measured_capacity_ah / p.nominal_capacity_ah));
+      this.r0 = this.r_pack = p.internal_resistance_mohm / 1000;
+      this.efc = p.cycle_count; this.ah = 0;
+      const mass = Math.max(0.045, p.nominal_capacity_ah * 3.7 / this.chem.wh_per_kg) * p.series_cells;
+      this.c_th = mass * 1000; this.h_a = 1.5 * Math.pow(mass, 2 / 3);
+      this.load_on = true; this.mode = "Idle"; this.loggedMode = "Idle"; this.pendMode = null; this.pendSince = 0;
+      this.logEvents = logEvents; this.events = []; this.seq = 0; this.lastLed = null;
+      this._dayCache = -1; this._updDate();
+      this.dayWeather = this.pickWeather();
+      this.t_batt = ambient(this.month, this.hour, this.dayWeather);
+      this.spread = p.cell_spread_mv / 1000;
+      this.v_cv_cell = cfg.ctrl.v_cv_cell || this.chem.v_cv_cell;
+      this.soc_cv = socFromOcv(this.v_cv_cell, p.chemistry);
+      this.totals = { pv_wh: 0, curtailed_wh: 0, load_wh: 0, unmet_wh: 0, charge_wh: 0, discharge_wh: 0, loss_wh: 0 };
+      this.days = []; this.fade = null; this.soh_t0 = this.soh;
+      this.newDay();
+      const ocv = p.series_cells * ocvCell(this.soc, p.chemistry);
+      this.inst = { ghi: 0, k: 1, t_amb: this.t_batt, t_panel: this.t_batt, sin_alt: 0, pv_avail: 0, pv: 0, cur: 0,
+                    dem: 0, served: 0, pb: 0, i: 0, v: ocv, ocv, led: false };
+    }
+    get hour() { return ((this.cfg.site.start_hour + this.t / 3600) % 24 + 24) % 24; }
+    get dayIndex() { return Math.floor((this.cfg.site.start_hour + this.t / 3600) / 24); }
+    _updDate() {
+      const di = this.dayIndex; if (di === this._dayCache) return; this._dayCache = di;
+      const dt = new Date(this.date0 + di * 86400000);
+      this.month = dt.getUTCMonth() + 1;
+      this.doy = Math.floor((Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()) - Date.UTC(dt.getUTCFullYear(), 0, 1)) / 86400000) + 1;
+      this.dateStr = dt.toISOString().slice(0, 10);
+    }
+    nowIso() {
+      const h = this.hour, hh = Math.floor(h), mm = Math.floor((h - hh) * 60), ss = Math.floor(((h - hh) * 60 - mm) * 60);
+      return `${this.dateStr}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    }
+    pickWeather() {
+      const w = this.cfg.site.weather; if (w !== "auto") return w;
+      const pr = SEASON[this.month]; const r = this.rand(); let acc = 0;
+      for (let i = 0; i < 4; i++) { acc += pr[i]; if (r <= acc) return KINDS[i]; }
+      return "partly";
+    }
+    setWeather(w) { this.cfg.site.weather = w; this.dayWeather = this.pickWeather(); this.ev("day", `Weather set to ${w}`); }
+    newDay() { this.day = { date: this.dateStr, pv_wh: 0, curtailed_wh: 0, load_wh: 0, demand_wh: 0, unmet_wh: 0,
+                            soc_min: this.soc, soc_max: this.soc, t_batt_max: -99, soh_start: this.soh, peak_pv_w: 0 }; }
+    ev(kind, msg) {
+      if (!this.logEvents) return;
+      this.seq++; this.events.push({ seq: this.seq, t: this.nowIso().slice(0, 16), kind, msg });
+      if (this.events.length > 300) this.events = this.events.slice(-300);
+    }
+    step(dt) {
+      const c = this.cfg, p = c.pack, ctrl = c.ctrl;
+      const prevDay = this.dayIndex, hour = this.hour;
+      // environment
+      const sinAlt = sunSinAlt(c.site.latitude, this.doy, hour);
+      const [mean, sd, tau] = CLOUD[this.dayWeather]; const a = Math.exp(-dt / tau);
+      this.k = mean + (this.k - mean) * a + sd * Math.sqrt(Math.max(0, 1 - a * a)) * this.rand.gauss();
+      this.k = Math.min(1.05, Math.max(0.05, this.k));
+      const g = clearSky(sinAlt) * this.k * c.panel.poa_factor;
+      const tAmb = ambient(this.month, hour, this.dayWeather);
+      const tPanel = tAmb + (c.panel.noct - 20) / 800 * g;
+      const pvAvail = Math.max(0, c.panel.rated_w * g / 1000 * (1 + c.panel.temp_coeff * (tPanel - 25)) * c.panel.derate);
+      // battery
+      const ns = p.series_cells, capAh = p.nominal_capacity_ah * this.soh;
+      const ocv = ns * ocvCell(this.soc, p.chemistry), r = this.r_pack, tb = this.t_batt;
+      // load & LVD
+      const dem = loadDemand(hour, c.load), ledSched = dem > c.load.base_w + 1e-9;
+      if (this.load_on && this.soc <= ctrl.soc_lvd) { this.load_on = false; this.ev("protect", `Low-voltage disconnect at SOC ${(this.soc * 100).toFixed(0)}% — load shed`); }
+      else if (!this.load_on && this.soc >= ctrl.soc_reconnect) { this.load_on = true; this.ev("protect", `Load reconnected at SOC ${(this.soc * 100).toFixed(0)}%`); }
+      const eta = ctrl.mppt_eff, pvBus = pvAvail * eta;
+      const chargeOk = tb >= ctrl.t_charge_min && tb <= ctrl.t_charge_max;
+      const iccNom = Math.min(ctrl.charge_c_rate * capAh, ctrl.max_charge_a);
+      let icc = iccNom;
+      if (tb > ctrl.t_derate_start) icc *= Math.max(0, (ctrl.t_charge_max - tb) / (ctrl.t_charge_max - ctrl.t_derate_start));
+      const icv = Math.max(0, (ns * this.v_cv_cell - ocv) / r);
+      const full = this.soc >= this.soc_cv - 1e-4 || icv < ctrl.taper_c * capAh;
+      const ichgMax = (!chargeOk || full) ? 0 : Math.min(icc, icv);
+      // 1) load
+      let pdis = 0, shed = null, served;
+      if (dem <= 0) served = 0;
+      else if (!this.load_on) { served = 0; shed = "Load shed (LVD)"; }
+      else {
+        const pvToLoad = Math.min(pvBus, dem), deficit = dem - pvToLoad;
+        if (deficit <= 1e-9) served = dem;
+        else if (tb > ctrl.t_discharge_max) { served = 0; shed = "Thermal hold"; }
+        else {
+          const imd = ctrl.max_discharge_c * capAh, pmd = Math.max(0, (ocv - imd * r) * imd);
+          const eav = this.soc * capAh * ocv * 3600 / dt;
+          if (Math.min(pmd, eav, 0.999 * ocv * ocv / (4 * r)) + 1e-9 >= deficit) { served = dem; pdis = deficit; }
+          else { served = 0; shed = "Load shed (limit)"; }
+        }
+      }
+      // 2) charge
+      const pvLeft = pvBus - (served - pdis);
+      let pchg = 0;
+      const pchgMax = (ocv + ichgMax * r) * ichgMax;
+      if (pdis === 0 && pvLeft > 1e-9 && ichgMax > 1e-9) pchg = Math.min(pvLeft, pchgMax);
+      const pb = pchg - pdis;
+      let mode;
+      if (pdis > 0) mode = "Discharging";
+      else if (pchg > 0) {
+        if (pchg < pchgMax - 1e-6) mode = "MPPT charge";
+        else if (icv <= icc) mode = "CV charge";
+        else if (icc < iccNom - 1e-6) mode = "Charge (thermal derate)";
+        else mode = "CC charge";
+      } else if (shed) mode = shed;
+      else if (pvLeft > 1e-9 && !chargeOk) mode = "Thermal hold";
+      else if (pvLeft > 1e-9 && full) mode = "Full · float";
+      else mode = "Idle";
+      const pvUsed = eta > 0 ? Math.min(pvAvail, (served - pdis + pchg) / eta) : 0;
+      const cur = Math.max(0, pvAvail - pvUsed);
+      // current
+      const disc = ocv * ocv + 4 * r * pb;
+      const i = Math.abs(pb) > 1e-12 ? (-ocv + Math.sqrt(Math.max(0, disc))) / (2 * r) : 0;
+      const v = ocv + i * r;
+      const before = this.soc;
+      this.soc += i * (i > 0 ? 0.995 : 1) * dt / 3600 / capAh;
+      if (i > 0) this.soc = Math.min(this.soc, Math.max(this.soc_cv, before));
+      this.soc = Math.min(1, Math.max(0, this.soc));
+      // thermal
+      const q = i * i * r;
+      const tEnv = tAmb + c.site.enclosure_solar_gain_c * Math.min(1, g / 1000);
+      const tEq = tEnv + q / this.h_a;
+      this.t_batt = tEq + (tb - tEq) * Math.exp(-dt / (this.c_th / this.h_a));
+      // ageing
+      const A = c.ageing, tk = tb + 273.15, dAh = Math.abs(i) * dt / 3600;
+      this.ah += dAh; const dEfc = dAh / (2 * Math.max(1e-6, capAh)); this.efc += dEfc;
+      const arrCyc = Math.exp(-A.ea_cyc / R_GAS * (1 / tk - 1 / T_REF_K));
+      const arrCal = Math.exp(-A.ea_cal / R_GAS * (1 / tk - 1 / T_REF_K));
+      const crate = Math.abs(i) / Math.max(1e-6, capAh);
+      const knee = 1 + Math.max(0, A.knee_soh - this.soh) * A.knee_gain;
+      const dCyc = this.chem.cyc_fade_per_efc * dEfc * arrCyc * (1 + 0.8 * crate) * knee;
+      const dCal = this.chem.cal_fade_per_year / (365.25 * 86400) * dt * arrCal * ((0.4 + 0.9 * this.soc) / 0.85);
+      this.soh = Math.max(0, this.soh - dCyc - dCal);
+      this.r_pack = this.r0 * (1 + A.r_growth * Math.max(0, this.soh0 - this.soh) / this.soh0);
+      // accounting
+      const h = dt / 3600, T = this.totals, D = this.day;
+      T.pv_wh += pvUsed * h; T.curtailed_wh += cur * h; T.load_wh += served * h; T.unmet_wh += (dem - served) * h;
+      T.charge_wh += Math.max(0, pb) * h; T.discharge_wh += Math.max(0, -pb) * h; T.loss_wh += (q + pvUsed * (1 - eta)) * h;
+      D.pv_wh += pvUsed * h; D.curtailed_wh += cur * h; D.load_wh += served * h; D.demand_wh += dem * h; D.unmet_wh += (dem - served) * h;
+      D.soc_min = Math.min(D.soc_min, this.soc); D.soc_max = Math.max(D.soc_max, this.soc);
+      D.t_batt_max = Math.max(D.t_batt_max, this.t_batt); D.peak_pv_w = Math.max(D.peak_pv_w, pvUsed);
+      // events (debounced 5 sim-minutes)
+      if (mode !== this.loggedMode) {
+        if (mode !== this.pendMode) { this.pendMode = mode; this.pendSince = this.t; }
+        else if (this.t - this.pendSince >= 300) { this.ev("mode", `${this.loggedMode} → ${mode}`); this.loggedMode = mode; }
+      } else this.pendMode = null;
+      if (this.lastLed !== null && ledSched !== this.lastLed) this.ev("load", ledSched ? "Street light ON" : "Street light OFF");
+      this.lastLed = ledSched; this.mode = mode;
+      this.t += dt;
+      if (this.dayIndex !== prevDay) { this._updDate(); this.closeDay(); }
+      this.inst = { ghi: g, k: this.k, t_amb: tAmb, t_panel: tPanel, sin_alt: sinAlt, pv_avail: pvAvail, pv: pvUsed, cur,
+                    dem, served, pb, i, v, ocv, led: ledSched && served > 0 };
+    }
+    closeDay() {
+      const d = this.day, f = d.soh_start - this.soh;
+      this.fade = this.fade === null ? f : 0.8 * this.fade + 0.2 * f;
+      d.soh_end = this.soh; d.weather = this.dayWeather;
+      d.served_pct = d.demand_wh > 0 ? 100 * d.load_wh / d.demand_wh : 100;
+      this.days.push(d); if (this.days.length > 4000) this.days = this.days.slice(-4000);
+      this.dayWeather = this.pickWeather(); this.newDay();
+      this.ev("day", `New day · weather: ${this.dayWeather}`);
+    }
+    rulYears() {
+      const eol = this.cfg.ageing.eol_soh; if (this.soh <= eol) return 0;
+      let rate = this.fade;
+      if (rate === null) { const ed = this.t / 86400; if (ed < 0.25) return null; rate = (this.soh_t0 - this.soh) / ed; }
+      return rate > 0 ? (this.soh - eol) / rate / 365.25 : null;
+    }
+    advance(sec, sub = 10) { let rem = sec; while (rem > 1e-9) { const dt = Math.min(sub, rem); this.step(dt); rem -= dt; } return this.snapshot(); }
+    snapshot() {
+      const p = this.cfg.pack, I = this.inst, cap = p.nominal_capacity_ah * this.soh;
+      const vNom = p.series_cells * ocvCell(0.5, p.chemistry);
+      const usable = Math.max(0, this.soc - this.cfg.ctrl.soc_lvd) * cap * vNom;
+      const nightW = this.cfg.load.led_w * 0.75 + this.cfg.load.base_w;
+      const spread = this.spread * ((this.soc < 0.2 || this.soc > 0.9) ? 2 : 1);
+      const vCell = I.v / p.series_cells, rul = this.rulYears();
+      const vmpT = this.cfg.panel.vmp * (1 - 0.0035 * (I.t_panel - 25));
+      return {
+        sim_time: this.nowIso(), hour: this.hour, elapsed_s: this.t, weather: this.dayWeather, mode: this.mode,
+        load_connected: this.load_on,
+        sun: { ghi_wm2: I.ghi, clear_index: I.k, sin_altitude: I.sin_alt, rise_set: sunTimes(this.cfg.site.latitude, this.doy) },
+        temps: { ambient_c: I.t_amb, panel_c: I.t_panel, battery_c: this.t_batt },
+        power: { pv_available_w: I.pv_avail, pv_w: I.pv, curtailed_w: I.cur, load_demand_w: I.dem, load_w: I.served, battery_w: I.pb },
+        panel: { v: I.pv > 0 ? vmpT : 0, i: I.pv > 0 ? I.pv / Math.max(0.1, vmpT) : 0 },
+        battery: { voltage_v: I.v, ocv_v: I.ocv, current_a: I.i, soc: this.soc, soh: this.soh, capacity_ah: cap,
+                   resistance_mohm: this.r_pack * 1000, efc: this.efc, usable_wh: usable,
+                   autonomy_h: nightW > 0 ? usable / nightW : null, cell_v_min: vCell - spread / 2, cell_v_max: vCell + spread / 2 },
+        led_on: I.led, rul_years: rul, today: Object.assign({}, this.day), totals: Object.assign({}, this.totals),
+      };
+    }
+    canonical(id = "SOLAR-TWIN-01") {
+      const s = this.snapshot(), b = s.battery;
+      return { battery_id: id, timestamp: s.sim_time, voltage: r2(b.voltage_v, 3), current: r2(b.current_a, 4),
+               temperature: r2(s.temps.battery_c, 2), capacity: r2(b.capacity_ah, 4), cycle: Math.floor(b.efc),
+               internal_resistance: r2(b.resistance_mohm / 1000, 5), cell_v_min: r2(b.cell_v_min, 4),
+               cell_v_max: r2(b.cell_v_max, 4), source: "SOLAR_TWIN" };
+    }
+  }
+
+  // ---- lifetime projection (chunked so the page stays responsive) ----
+  function lifetimeRunner(cfgIn, maxYears = 15, stepS = 900, seed = 11) {
+    const tw = new Twin(cfgIn, seed, false);
+    const eol = tw.cfg.ageing.eol_soh, total = Math.floor(maxYears * 365.25);
+    const weekly = []; let day = 0, eolDay = null;
+    function result() {
+      const ds = tw.days, full = ds.filter(d => d.unmet_wh < 0.01 * Math.max(1e-9, d.demand_wh)).length;
+      const kwh = tw.totals.load_wh / 1000;
+      return { eol_soh: eol, start_soh: tw.soh0, years_simulated: ds.length / 365.25, reached_eol: eolDay !== null,
+        years_to_eol: eolDay ? eolDay / 365.25 : null, final_soh: tw.soh, final_resistance_mohm: tw.r_pack * 1000,
+        efc_added: tw.efc - tw.cfg.pack.cycle_count, energy_delivered_kwh: kwh, pv_harvested_kwh: tw.totals.pv_wh / 1000,
+        curtailed_kwh: tw.totals.curtailed_wh / 1000, unmet_kwh: tw.totals.unmet_wh / 1000,
+        nights_fully_served_pct: 100 * full / Math.max(1, ds.length), co2_avoided_kg: kwh * GRID_CO2, weekly,
+        v_cv_cell: tw.v_cv_cell };
+    }
+    return {
+      run(days) {
+        for (let n = 0; n < days && day < total && eolDay === null; n++, day++) {
+          tw.advance(86400, stepS);
+          if (day % 7 === 0) { const s = tw.days[tw.days.length - 1] || {};
+            weekly.push({ day, soh: tw.soh, resistance_mohm: tw.r_pack * 1000, efc: tw.efc, served_pct: s.served_pct ?? 100 }); }
+          if (tw.soh <= eol) { eolDay = day + 1; weekly.push({ day: day + 1, soh: tw.soh, resistance_mohm: tw.r_pack * 1000, efc: tw.efc, served_pct: 100 }); }
+        }
+        return day >= total || eolDay !== null;
+      },
+      progress() { return Math.min(1, day / Math.max(1, Math.min(total, 365.25 * 8))); },
+      result,
+    };
+  }
+  function gentleCfg(cfgIn) {
+    const c = merge(JSON.parse(JSON.stringify(cfgIn || {})));
+    const base = c.ctrl.v_cv_cell || CHEM[c.pack.chemistry].v_cv_cell;
+    const target = Math.max(0.5, socFromOcv(base, c.pack.chemistry) - 0.10);
+    c.ctrl.v_cv_cell = Math.round(ocvCell(target, c.pack.chemistry) * 1000) / 1000;
+    return c;
+  }
+  function scenarios(cfgIn) {
+    const std = merge(JSON.parse(JSON.stringify(cfgIn || {})));
+    const gentle = gentleCfg(cfgIn);
+    const shaded = gentleCfg(cfgIn); shaded.site.enclosure_solar_gain_c = Math.min(2, std.site.enclosure_solar_gain_c);
+    const sv = std.ctrl.v_cv_cell || CHEM[std.pack.chemistry].v_cv_cell;
+    return [
+      { key: "standard", label: `Standard charge (${sv.toFixed(2)} V/cell)`, cfg: std },
+      { key: "gentle", label: `Gentle charge (${gentle.ctrl.v_cv_cell.toFixed(2)} V/cell)`, cfg: gentle },
+      { key: "shaded_gentle", label: "Gentle charge + shaded battery box", cfg: shaded },
+    ];
+  }
+
+  root.SolarTwin = { Twin, PRESETS, CHEM, defaults, merge, validate, lifetimeRunner, scenarios, ocvCell, socFromOcv, sunTimes, GRID_CO2 };
+  if (typeof module !== "undefined") module.exports = root.SolarTwin;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+(function () {
+"use strict";
+const ST = window.SolarTwin;
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 1) => (v == null || !isFinite(v)) ? "–" : v.toFixed(d);
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- state ---------- */
+let cfg = {}; let presetKey = "ev_module_streetlight";
+let twin = null, snap = null, speed = 600, playing = true;
+let hist = [], nextSample = 0, startHourAbs = 6;
+let lastLogSeq = 0, logs = [];
+let backend = null; // {url, sid, es}
+let dayRows = [];
+
+function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+function configFromPreset(k) { return JSON.parse(JSON.stringify(ST.PRESETS[k].config)); }
+
+/* ---------- scene ---------- */
+const NS = "http://www.w3.org/2000/svg";
+const scene = $("scene");
+scene.innerHTML = `
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop id="sky0" offset="0"/><stop id="sky1" offset="1"/></linearGradient>
+  <radialGradient id="sunGlow"><stop offset="0" stop-color="#fff4c2" stop-opacity=".95"/><stop offset=".35" stop-color="#ffc94d" stop-opacity=".55"/><stop offset="1" stop-color="#ffb000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a3" stop-opacity=".75"/><stop offset="1" stop-color="#ffe7a3" stop-opacity="0"/></linearGradient>
+  <linearGradient id="panelG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4f7d"/><stop offset="1" stop-color="#173252"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1000" height="300" fill="url(#sky)"/>
+<g id="stars" fill="#ffffff"></g>
+<circle id="sunGlowC" r="70" fill="url(#sunGlow)"/>
+<circle id="sunC" r="20" fill="#ffd34d"/>
+<circle id="moonC" r="13" fill="#e8eef5"/>
+<g id="clouds" fill="#ffffff"></g>
+<g id="rays" stroke="#ffd34d" stroke-width="2" stroke-dasharray="3 9" opacity="0"></g>
+<rect x="0" y="300" width="1000" height="170" fill="var(--scene-ground)"/>
+<rect x="0" y="300" width="1000" height="6" fill="var(--scene-ground-2)"/>
+<!-- panel -->
+<g id="panelG">
+  <line x1="175" y1="248" x2="175" y2="300" stroke="#7d8a96" stroke-width="5"/>
+  <polygon points="70,230 270,200 290,262 90,292" fill="url(#panelG)" stroke="#9fb4c8" stroke-width="2"/>
+  <g stroke="#4f78a6" stroke-width="1" opacity=".9" id="panelGrid"></g>
+  <polygon id="panelSheen" points="70,230 270,200 290,262 90,292" fill="#ffd34d" opacity="0"/>
+</g>
+<!-- wires (tracks) -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path id="w1t" d="M175 300 V385 H300" stroke="#5b6b79" stroke-width="7" opacity=".55"/>
+  <path id="w2t" d="M452 385 H515" stroke="#5b6b79" stroke-width="7" opacity=".55"/>
+  <path id="w3t" d="M376 340 V318 H880 V128" stroke="#5b6b79" stroke-width="7" opacity=".55"/>
+  <path id="w1" d="M175 300 V385 H300" stroke="var(--sun)" stroke-width="5" stroke-dasharray="2 13"/>
+  <path id="w2" d="M452 385 H515" stroke="var(--charge)" stroke-width="5" stroke-dasharray="2 13"/>
+  <path id="w3" d="M376 340 V318 H880 V128" stroke="var(--load)" stroke-width="5" stroke-dasharray="2 13"/>
+</g>
+<!-- controller -->
+<g>
+  <rect x="300" y="340" width="152" height="92" rx="8" fill="#e9eef2" stroke="#9aa8b5"/>
+  <text x="314" y="362" font-size="12" fill="#3b4a58">MPPT CONTROLLER</text>
+  <text id="ctlMode" x="314" y="385" font-size="15" fill="#142231" font-weight="500">Idle</text>
+  <circle id="ledPv" cx="320" cy="412" r="5" fill="#9aa8b5"/><text x="329" y="416" font-size="10" fill="#3b4a58">PV</text>
+  <circle id="ledBat" cx="362" cy="412" r="5" fill="#9aa8b5"/><text x="371" y="416" font-size="10" fill="#3b4a58">BAT</text>
+  <circle id="ledLoad" cx="410" cy="412" r="5" fill="#9aa8b5"/><text x="419" y="416" font-size="10" fill="#3b4a58">LOAD</text>
+</g>
+<!-- battery -->
+<g>
+  <rect x="515" y="326" width="262" height="120" rx="8" fill="#e9eef2" stroke="#9aa8b5"/>
+  <text id="batTitle" x="529" y="346" font-size="12" fill="#3b4a58">SECOND-LIFE PACK · 4S NMC</text>
+  <g id="cells"></g>
+  <text id="batV" x="680" y="374" font-size="17" fill="#142231" font-weight="500">0.00 V</text>
+  <text id="batI" x="680" y="394" font-size="12" fill="#3b4a58">0.00 A</text>
+  <text id="batT" x="680" y="412" font-size="12" fill="#3b4a58">0.0 °C</text>
+  <text id="batS" x="680" y="430" font-size="12" fill="#3b4a58">SOH 0 %</text>
+</g>
+<!-- street light -->
+<g>
+  <polygon id="coneP" points="815,132 865,132 960,300 720,300" fill="url(#cone)" opacity="0"/>
+  <ellipse id="poolE" cx="840" cy="303" rx="120" ry="9" fill="#ffe7a3" opacity="0"/>
+  <line x1="880" y1="300" x2="880" y2="118" stroke="#8796a3" stroke-width="7"/>
+  <path d="M880 118 Q880 100 860 104 L815 112" stroke="#8796a3" stroke-width="6" fill="none"/>
+  <rect x="808" y="110" width="58" height="14" rx="4" fill="#5d6b78"/>
+  <rect id="lamp" x="813" y="122" width="48" height="6" rx="3" fill="#8b98a4"/>
+</g>
+<!-- chips -->
+<g id="chipPv"><rect class="chip-bg" x="184" y="322" width="112" height="40" rx="6"/><text class="chip-tx" x="191" y="339" id="chipPvT">0 W</text><text class="chip-sm" x="191" y="355" id="chipPvS">PV harvest</text></g>
+<g id="chipCur"><rect class="chip-bg" x="22" y="408" width="236" height="40" rx="6"/><text class="chip-tx" x="38" y="425" id="chipCurT">0 W spare</text><text class="chip-sm" x="38" y="441">curtailed: battery can't take it</text></g>
+<g id="chipLoad"><rect class="chip-bg" x="540" y="262" width="196" height="40" rx="6"/><text class="chip-tx" x="548" y="279" id="chipLoadT">0 W</text><text class="chip-sm" x="548" y="295" id="chipLoadS">street light</text></g>
+<g><rect class="chip-bg" x="18" y="14" width="250" height="42" rx="6"/><text class="chip-tx" x="26" y="31" id="chipSky">0 W/m²</text><text class="chip-sm" x="26" y="48" id="chipSky2">clear sky · 0 °C</text></g>
+`;
+// panel grid
+(function () { const g = $("panelGrid"); let s = "";
+  for (let i = 1; i < 6; i++) { const t = i / 6; s += `<line x1="${70 + 200 * t}" y1="${230 - 30 * t}" x2="${90 + 200 * t}" y2="${292 - 30 * t}"/>`; }
+  for (let j = 1; j < 3; j++) { const t = j / 3; s += `<line x1="${70 + 20 * t}" y1="${230 + 62 * t}" x2="${270 + 20 * t}" y2="${200 + 62 * t}"/>`; }
+  g.innerHTML = s; })();
+(function () { const g = $("stars"); let s = "";
+  let a = 12345; const rnd = () => (a = (a * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 46; i++) s += `<circle cx="${(rnd() * 1000).toFixed(0)}" cy="${(rnd() * 230).toFixed(0)}" r="${(rnd() * 1.3 + .4).toFixed(1)}"/>`;
+  g.innerHTML = s; })();
+const cloudDefs = [[150, 70, 1.0], [470, 46, 1.25], [760, 92, .9], [980, 58, 1.1]];
+$("clouds").innerHTML = cloudDefs.map((c, i) => `<g id="cl${i}"><ellipse cx="0" cy="0" rx="${48 * c[2]}" ry="${16 * c[2]}"/><ellipse cx="${-20 * c[2]}" cy="${-10 * c[2]}" rx="${24 * c[2]}" ry="${18 * c[2]}"/><ellipse cx="${16 * c[2]}" cy="${-14 * c[2]}" rx="${28 * c[2]}" ry="${21 * c[2]}"/></g>`).join("");
+
+function drawCells(n) {
+  const k = Math.min(n, 8), w = Math.min(26, (140 - (k - 1) * 6) / k), g = $("cells"); let s = "";
+  for (let i = 0; i < k; i++) { const x = 529 + i * (w + 6);
+    s += `<rect x="${x}" y="356" width="${w}" height="78" rx="3" fill="#cfd8df" stroke="#8d9ba8"/><rect class="cellFill" x="${x + 2}" y="432" width="${w - 4}" height="0" rx="2" fill="var(--charge)"/><rect x="${x + w / 2 - 4}" y="352" width="8" height="4" fill="#8d9ba8"/>`; }
+  g.innerHTML = s + (n > 8 ? `<text x="529" y="446" font-size="10" fill="#3b4a58">+${n - 8} more in series</text>` : "");
+}
+
+function mix(a, b, t) { const pa = a.match(/\w\w/g).map(h => parseInt(h, 16)), pb = b.match(/\w\w/g).map(h => parseInt(h, 16));
+  return "#" + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, "0")).join(""); }
+function skyColors(sinAlt) {
+  if (sinAlt <= -0.12) return ["#0b1626", "#1b2b44"];
+  if (sinAlt <= 0.0) { const t = (sinAlt + 0.12) / 0.12; return [mix("0b1626", "2c3e66", t), mix("1b2b44", "e08a5a", t)]; }
+  if (sinAlt <= 0.25) { const t = sinAlt / 0.25; return [mix("2c3e66", "4f8fd0", t), mix("e08a5a", "bfdcf2", t)]; }
+  return ["#3f86cf", "#bfdcf2"];
+}
+
+let offs = [0, 0, 0], clDrift = 0;
+function renderScene(s, dtWall) {
+  const sun = s.sun, hour = s.hour, [rise, set] = sun.rise_set;
+  const [c0, c1] = skyColors(sun.sin_altitude);
+  $("sky0").setAttribute("stop-color", c0); $("sky1").setAttribute("stop-color", c1);
+  const night = sun.sin_altitude <= 0;
+  $("stars").setAttribute("opacity", Math.max(0, Math.min(1, -sun.sin_altitude * 6)).toFixed(2));
+  const f = (hour - rise) / (set - rise);
+  const sx = 40 + 920 * f, sy = 290 - 240 * Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, f))));
+  const vis = f > -0.02 && f < 1.02;
+  $("sunC").setAttribute("cx", sx); $("sunC").setAttribute("cy", sy); $("sunC").setAttribute("opacity", vis ? 1 : 0);
+  $("sunGlowC").setAttribute("cx", sx); $("sunGlowC").setAttribute("cy", sy); $("sunGlowC").setAttribute("opacity", vis ? (0.4 + 0.6 * sun.clear_index).toFixed(2) : 0);
+  // moon on the opposite arc
+  const nf = ((hour - set + 24) % 24) / (24 - (set - rise));
+  $("moonC").setAttribute("cx", 40 + 920 * nf); $("moonC").setAttribute("cy", 280 - 200 * Math.sin(Math.PI * Math.min(1, Math.max(0, nf))));
+  $("moonC").setAttribute("opacity", night ? 0.9 : 0);
+  // clouds
+  clDrift += (reduceMotion ? 0 : dtWall * 8);
+  const cOp = Math.max(0, Math.min(0.92, (1 - sun.clear_index) * 1.35 + 0.08));
+  cloudDefs.forEach((c, i) => { const x = ((c[0] + clDrift * (0.6 + i * 0.15)) % 1150) - 75;
+    const el = $("cl" + i); el.setAttribute("transform", `translate(${x.toFixed(1)},${c[1]})`);
+    el.setAttribute("opacity", (night ? cOp * 0.25 : cOp).toFixed(2)); el.setAttribute("fill", s.weather === "monsoon" ? "#9aa6b2" : "#ffffff"); });
+  // rays
+  const rays = $("rays");
+  if (vis && sun.ghi_wm2 > 5) {
+    rays.innerHTML = [0, 1, 2].map(k => `<line x1="${sx}" y1="${sy}" x2="${120 + k * 70}" y2="${232 - k * 10}"/>`).join("");
+    rays.setAttribute("opacity", Math.min(0.9, sun.ghi_wm2 / 900).toFixed(2));
+  } else rays.setAttribute("opacity", 0);
+  $("panelSheen").setAttribute("opacity", Math.min(0.28, sun.ghi_wm2 / 3500).toFixed(3));
+  // flows
+  const P = s.power, pk = Math.max(1, cfg.panel ? cfg.panel.rated_w : 100);
+  const flows = [[P.pv_w, 1], [Math.abs(P.battery_w), P.battery_w >= 0 ? 1 : -1], [P.load_w, 1]];
+  ["w1", "w2", "w3"].forEach((id, i) => {
+    const [pw, dir] = flows[i], el = $(id), on = pw > 0.005 * pk;
+    const sp = on ? 18 + 120 * Math.sqrt(Math.min(1.5, pw / pk)) : 0;
+    if (!reduceMotion) offs[i] -= dir * sp * dtWall;
+    el.setAttribute("stroke-dashoffset", offs[i].toFixed(1));
+    el.setAttribute("opacity", on ? 1 : 0);
+    el.setAttribute("stroke-width", (3 + 4 * Math.min(1, Math.sqrt(pw / pk))).toFixed(1));
+  });
+  $("w2").setAttribute("stroke", P.battery_w >= 0 ? "var(--charge)" : "var(--load)");
+  // controller
+  $("ctlMode").textContent = s.mode;
+  $("ledPv").setAttribute("fill", P.pv_w > 0.05 ? "#e8a317" : "#9aa8b5");
+  $("ledBat").setAttribute("fill", P.battery_w > 0.01 ? "#12a07f" : (P.battery_w < -0.01 ? "#4766e0" : "#9aa8b5"));
+  $("ledLoad").setAttribute("fill", !s.load_connected ? "#d43c3c" : (P.load_w > 0.01 ? "#4766e0" : "#9aa8b5"));
+  // battery
+  const b = s.battery, fills = document.querySelectorAll(".cellFill");
+  const shades = [0, 1, -1, 0.5, -0.5, 0.8, -0.8, 0.3];
+  fills.forEach((el, i) => { const spr = (cfg.pack ? cfg.pack.cell_spread_mv : 0) / 1000 / 0.6 * shades[i];
+    const h = Math.max(0, Math.min(1, b.soc + spr * 0.5)) * 74; el.setAttribute("y", (432 - h).toFixed(1)); el.setAttribute("height", h.toFixed(1));
+    el.setAttribute("fill", b.soc <= (cfg.ctrl ? cfg.ctrl.soc_lvd : 0.1) + 0.02 ? "var(--crit)" : "var(--charge)"); });
+  $("batV").textContent = `${fmt(b.voltage_v, 2)} V`;
+  $("batI").textContent = `${b.current_a >= 0 ? "+" : "−"}${fmt(Math.abs(b.current_a), 2)} A`;
+  $("batT").textContent = `${fmt(s.temps.battery_c, 1)} °C`;
+  $("batS").textContent = `SOH ${fmt(b.soh * 100, 2)} %`;
+  // light
+  const lampOn = s.led_on, lv = lampOn ? Math.min(1, P.load_w / Math.max(0.01, (cfg.load ? cfg.load.led_w + cfg.load.base_w : 12))) : 0;
+  $("coneP").setAttribute("opacity", (lv * 0.9).toFixed(2)); $("poolE").setAttribute("opacity", (lv * 0.45).toFixed(2));
+  $("lamp").setAttribute("fill", lampOn ? "#fff3c4" : "#8b98a4");
+  // chips
+  $("chipPvT").textContent = `${fmt(P.pv_w, 1)} W`;
+  $("chipPvS").textContent = s.panel.v > 0 ? `${fmt(s.panel.v, 1)} V · ${fmt(s.panel.i, 2)} A` : "panel dark";
+  $("chipCur").setAttribute("opacity", P.curtailed_w > 0.02 * pk ? 1 : 0);
+  $("chipCurT").textContent = `${fmt(P.curtailed_w, 1)} W spare`;
+  $("chipLoadT").textContent = `${fmt(P.load_w, 2)} W`;
+  $("chipLoadS").textContent = !s.load_connected ? "load shed: battery low" : (lampOn ? (P.load_w < (P.load_demand_w - 0.01) ? "dimmed" : (s.hour >= cfg.load.dim_start || s.hour < cfg.load.dim_end ? "street light · dimmed" : "street light · full")) : "light off · ESP32 node only");
+  $("chipSky").textContent = `${fmt(sun.ghi_wm2, 0)} W/m² · ${s.weather}`;
+  $("chipSky2").textContent = `ambient ${fmt(s.temps.ambient_c, 1)} °C · panel ${fmt(s.temps.panel_c, 1)} °C`;
+}
+
+/* ---------- tiles, pill, log ---------- */
+function modeClass(m) {
+  if (/CC|CV|MPPT|derate/.test(m)) return /derate/.test(m) ? "s-warn" : "s-charge";
+  if (/Discharg/.test(m)) return "s-dis"; if (/Full/.test(m)) return "s-full";
+  if (/shed/.test(m)) return "s-crit"; if (/Thermal/.test(m)) return "s-warn"; return "s-idle";
+}
+function renderTiles(s) {
+  const P = s.power, b = s.battery, t = s.temps;
+  $("clk").textContent = s.sim_time.slice(11, 16);
+  const day = Math.floor((startHourAbs + s.elapsed_s / 3600) / 24) + 1;
+  $("clkDate").textContent = `${s.sim_time.slice(0, 10)} · day ${day}`;
+  const pill = $("modePill"); pill.textContent = s.mode; pill.className = "pill " + modeClass(s.mode);
+  $("tPv").innerHTML = `${fmt(P.pv_w, P.pv_w < 10 ? 2 : 1)}<small>W</small>`;
+  $("tPvS").textContent = `${fmt(s.sun.ghi_wm2, 0)} W/m² · ${fmt(P.curtailed_w, 1)} W curtailed`;
+  $("tVb").innerHTML = `${fmt(b.voltage_v, 2)}<small>V</small>`;
+  $("tVbS").textContent = `${b.current_a >= 0 ? "+" : "−"}${fmt(Math.abs(b.current_a), 2)} A · ${P.battery_w >= 0 ? "charging" : "discharging"} ${fmt(Math.abs(P.battery_w), 1)} W`;
+  $("tSoc").innerHTML = `${fmt(b.soc * 100, 1)}<small>%</small>`;
+  const bar = $("tSocBar"); bar.style.width = (b.soc * 100).toFixed(1) + "%";
+  bar.style.background = b.soc <= (cfg.ctrl.soc_lvd + 0.05) ? "var(--crit)" : "var(--charge)";
+  const tb = t.battery_c; $("tTb").innerHTML = `${fmt(tb, 1)}<small>°C</small>`;
+  $("tTb").style.color = tb > cfg.ctrl.t_charge_max ? "var(--crit)" : (tb > cfg.ctrl.t_derate_start ? "var(--warn)" : "");
+  $("tTbS").textContent = `ambient ${fmt(t.ambient_c, 1)} °C · derate > ${cfg.ctrl.t_derate_start} °C`;
+  $("tSoh").innerHTML = `${fmt(b.soh * 100, 3)}<small>%</small>`;
+  $("tSohS").textContent = `${fmt(b.capacity_ah, 2)} Ah · ${fmt(b.resistance_mohm, 1)} mΩ · ${fmt(b.efc, 0)} cycles`;
+  $("tAut").innerHTML = `${fmt(b.autonomy_h, 1)}<small>h</small>`;
+  $("tAutS").textContent = `${fmt(b.usable_wh, 0)} Wh usable above LVD`;
+  const td = s.today; $("tDay").innerHTML = `${fmt(td.pv_wh, 0)}<small>Wh in</small>`;
+  const sp = td.demand_wh > 0 ? 100 * td.load_wh / td.demand_wh : 100;
+  $("tDayS").textContent = `${fmt(td.load_wh, 0)} Wh to light · ${fmt(sp, 0)} % served`;
+  $("tRul").innerHTML = s.rul_years == null ? `…<small>yr</small>` : `${fmt(s.rul_years, 1)}<small>yr</small>`;
+  $("tRulS").textContent = s.rul_years == null ? "estimating after 6 sim-hours" : `to ${Math.round(cfg.ageing.eol_soh * 100)} % SOH at the recent fade rate`;
+}
+function addLogs(list) {
+  for (const e of list) if (e.seq > lastLogSeq) { logs.push(e); lastLogSeq = e.seq; }
+  if (logs.length > 120) logs = logs.slice(-120);
+}
+let logRendered = -1;
+function renderLog() {
+  if (logRendered === lastLogSeq) return; logRendered = lastLogSeq;
+  $("log").innerHTML = logs.slice().reverse().map(e => `<div class="k-${e.kind}"><span class="muted">${e.t.slice(5, 10)} ${e.t.slice(11, 16)}</span><span>${e.msg.replace(/</g, "&lt;")}</span></div>`).join("") || `<div><span class="muted">—</span><span class="muted">Mode changes, light on/off and protections appear here.</span></div>`;
+  $("logCount").textContent = `${logs.length} events`;
+}
+function renderDays() {
+  if (!dayRows.length) return;
+  $("days").innerHTML = dayRows.slice(-7).reverse().map(d => `<tr><td>${d.date.slice(5)}</td><td>${d.weather}</td><td>${fmt(d.pv_wh, 0)}</td><td>${fmt(d.load_wh, 0)}</td><td style="color:${d.served_pct < 99 ? "var(--crit)" : "inherit"}">${fmt(d.served_pct, 0)} %</td><td>${fmt(d.soc_min * 100, 0)} %</td><td>${fmt(d.t_batt_max, 1)} °C</td></tr>`).join("");
+}
+
+/* ---------- charts ---------- */
+function setupCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(10, Math.round(r.width)), h = Math.max(10, Math.round(r.height));
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+function niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p; return 10 * p; }
+function chart(cv, o) {
+  const { ctx, w, h } = setupCanvas(cv);
+  const L = 40, R = 10, T = 8, B = 22, pw = w - L - R, ph = h - T - B;
+  const ink = css("--muted"), line = css("--line");
+  const x = (t) => L + (t - o.x0) / (o.x1 - o.x0) * pw, y = (v) => T + (1 - (v - o.y0) / (o.y1 - o.y0)) * ph;
+  ctx.font = `11px ${css("--f-mono") || "monospace"}`; ctx.fillStyle = ink; ctx.strokeStyle = line; ctx.lineWidth = 1;
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (const tv of o.yticks) { const yy = Math.round(y(tv)) + .5; ctx.globalAlpha = .7; ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(w - R, yy); ctx.stroke(); ctx.globalAlpha = 1; ctx.fillText(o.yfmt(tv), L - 6, yy); }
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (const [tv, lab] of o.xticks) { const xx = x(tv); if (xx < L - 1 || xx > w - R + 1) continue; ctx.fillText(lab, xx, h - B + 6); ctx.globalAlpha = .35; ctx.beginPath(); ctx.moveTo(Math.round(xx) + .5, T); ctx.lineTo(Math.round(xx) + .5, T + ph); ctx.stroke(); ctx.globalAlpha = 1; }
+  if (o.zero != null) { ctx.strokeStyle = ink; ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(L, y(o.zero)); ctx.lineTo(w - R, y(o.zero)); ctx.stroke(); ctx.globalAlpha = 1; }
+  if (o.hline) { ctx.strokeStyle = o.hline.color; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, y(o.hline.v)); ctx.lineTo(w - R, y(o.hline.v)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = o.hline.color; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(o.hline.label, L + 6, y(o.hline.v) - 3); }
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T, pw, ph); ctx.clip();
+  for (const s of o.series) {
+    const pts = s.pts; if (pts.length < 2) continue;
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 1.8; ctx.lineJoin = "round";
+    ctx.beginPath(); pts.forEach((p, i) => { const X = x(p[0]), Y = y(p[1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }); ctx.stroke();
+    if (s.fill) { const base = y(s.base != null ? s.base : o.y0); ctx.lineTo(x(pts[pts.length - 1][0]), base); ctx.lineTo(x(pts[0][0]), base); ctx.closePath(); ctx.globalAlpha = s.fill; ctx.fillStyle = s.color; ctx.fill(); ctx.globalAlpha = 1; }
+    if (s.dot) { const p = pts[pts.length - 1]; ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(x(p[0]), y(p[1]), 3.2, 0, 7); ctx.fill(); }
+  }
+  ctx.restore();
+}
+function hourTicks(x0, x1, cv) {
+  const span = x1 - x0, wide = cv.getBoundingClientRect().width;
+  let step = 6; while (wide / (span / 3600 / step) < 52) step *= 2;
+  const S = step * 3600, out = []; const h0 = Math.ceil((startHourAbs * 3600 + x0) / S) * S - startHourAbs * 3600;
+  for (let t = h0; t <= x1; t += S) { const hh = Math.round(((startHourAbs * 3600 + t) / 3600) % 24) % 24; out.push([t, `${String(hh).padStart(2, "0")}:00`]); }
+  return out;
+}
+function renderCharts() {
+  if (!snap) return;
+  const x0 = Math.max(0, snap.elapsed_s - 48 * 3600), x1 = Math.max(snap.elapsed_s, x0 + 12 * 3600);
+  const H = hist.filter(p => p.t >= x0); const xt = hourTicks(x0, x1, $("cPow")), xts = hourTicks(x0, x1, $("cSoc"));
+  const pmax = niceMax(Math.max(cfg.panel.rated_w * 0.8, ...H.map(p => Math.max(p.pv, p.load, Math.abs(p.b)))));
+  const pmin = -niceMax(Math.max(cfg.load.led_w + cfg.load.base_w, ...H.map(p => -p.b)));
+  chart($("cPow"), { x0, x1, y0: pmin, y1: pmax, yticks: [pmin, 0, pmax / 2, pmax], yfmt: v => `${Math.round(v)} W`, xticks: xt, zero: 0,
+    series: [{ pts: H.map(p => [p.t, p.pv]), color: css("--sun"), fill: .18, base: 0, dot: true },
+             { pts: H.map(p => [p.t, p.b]), color: css("--charge"), width: 1.6, dot: true },
+             { pts: H.map(p => [p.t, p.load]), color: css("--load"), width: 1.6, dot: true }] });
+  chart($("cSoc"), { x0, x1, y0: 0, y1: 100, yticks: [0, 25, 50, 75, 100], yfmt: v => `${v}%`, xticks: xts,
+    hline: { v: cfg.ctrl.soc_lvd * 100, label: "LVD", color: css("--crit") },
+    series: [{ pts: H.map(p => [p.t, p.soc * 100]), color: css("--charge"), fill: .16, dot: true }] });
+  const tmin = Math.floor(Math.min(20, ...H.map(p => Math.min(p.ta, p.tb))) / 5) * 5, tmax = Math.ceil(Math.max(40, ...H.map(p => Math.max(p.ta, p.tb))) / 5) * 5;
+  chart($("cTmp"), { x0, x1, y0: tmin, y1: tmax, yticks: [tmin, (tmin + tmax) / 2, tmax], yfmt: v => `${Math.round(v)}°`, xticks: xts,
+    series: [{ pts: H.map(p => [p.t, p.ta]), color: css("--muted"), width: 1.2 }, { pts: H.map(p => [p.t, p.tb]), color: css("--heat"), dot: true }] });
+}
+function sample(s) {
+  while (s.elapsed_s >= nextSample) {
+    hist.push({ t: s.elapsed_s, pv: s.power.pv_w, load: s.power.load_w, b: s.power.battery_w, soc: s.battery.soc, tb: s.temps.battery_c, ta: s.temps.ambient_c });
+    nextSample += 300;
+  }
+  if (hist.length > 700) hist = hist.slice(-600);
+}
+
+function advanceSampled(secs, sub = 10) {
+  let rem = secs;
+  while (rem > 1e-9) { const chunk = Math.min(rem, Math.max(1, nextSample - twin.t)); snap = twin.advance(chunk, sub); sample(snap); rem -= chunk; }
+}
+
+/* ---------- form ---------- */
+function fillPresetSelect() { $("fPreset").innerHTML = Object.entries(ST.PRESETS).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join(""); }
+function writeForm(c) {
+  const p = c.pack; $("fPreset").value = presetKey;
+  $("fChem").value = p.chemistry; $("fNs").value = p.series_cells; $("fNom").value = p.nominal_capacity_ah; $("fMeas").value = p.measured_capacity_ah;
+  $("fIr").value = p.internal_resistance_mohm; $("fSpread").value = p.cell_spread_mv; $("fCyc").value = p.cycle_count; $("fSoc").value = Math.round(p.initial_soc * 100);
+  $("fPv").value = c.panel.rated_w; $("fLed").value = c.load.led_w; $("fBase").value = c.load.base_w;
+  $("fVcv").value = (c.ctrl.v_cv_cell || ST.CHEM[p.chemistry].v_cv_cell).toFixed(2); $("fGain").value = c.site.enclosure_solar_gain_c;
+  $("fEol").value = Math.round(c.ageing.eol_soh * 100);
+  updateDerived();
+}
+function readForm() {
+  const n = (id) => parseFloat($(id).value);
+  const chem = $("fChem").value;
+  return {
+    panel: { rated_w: n("fPv"), vmp: cfg.panel.vmp },
+    pack: { chemistry: chem, series_cells: Math.round(n("fNs")), nominal_capacity_ah: n("fNom"), measured_capacity_ah: n("fMeas"),
+            internal_resistance_mohm: n("fIr"), cell_spread_mv: n("fSpread"), cycle_count: Math.round(n("fCyc")), initial_soc: n("fSoc") / 100 },
+    load: Object.assign({}, cfg.load, { led_w: n("fLed"), base_w: n("fBase") }),
+    ctrl: Object.assign({}, cfg.ctrl, { v_cv_cell: n("fVcv") }),
+    site: Object.assign({}, cfg.site, { enclosure_solar_gain_c: n("fGain") }),
+    ageing: Object.assign({}, cfg.ageing, { eol_soh: n("fEol") / 100 }),
+  };
+}
+function updateDerived() {
+  try {
+    const c = ST.merge(readForm()); const p = c.pack;
+    const soh = p.measured_capacity_ah / p.nominal_capacity_ah;
+    const vnom = p.series_cells * ST.ocvCell(0.5, p.chemistry);
+    const wh = p.measured_capacity_ah * vnom;
+    const night = c.load.led_w * (7 + 6 * c.load.dim_level) + c.load.base_w * 24;
+    const sohStr = isFinite(soh) ? (soh * 100).toFixed(1) : "–";
+    const cv = c.ctrl.v_cv_cell, top = ST.socFromOcv(cv, p.chemistry);
+    $("derived").innerHTML = `<span>SOH <b>${sohStr} %</b></span><span>Pack <b>${fmt(vnom, 1)} V · ${fmt(wh, 0)} Wh</b></span><span>Night use <b>${fmt(night, 0)} Wh</b></span><span>Charge stops at <b>${fmt(top * 100, 0)} % SOC</b></span>`;
+  } catch (e) { $("derived").textContent = ""; }
+}
+
+/* ---------- local engine ---------- */
+function startLocal(c) {
+  cfg = ST.merge(JSON.parse(JSON.stringify(c)));
+  cfg.site.start_date = todayStr(); cfg.site.start_hour = 6;
+  if (!cfg.ctrl.v_cv_cell) cfg.ctrl.v_cv_cell = ST.CHEM[cfg.pack.chemistry].v_cv_cell;
+  cfg.site.weather = $("weatherSel").value;
+  twin = new ST.Twin(cfg, 7, true);
+  startHourAbs = cfg.site.start_hour; hist = []; nextSample = 0; logs = []; lastLogSeq = 0; logRendered = -1; dayRows = [];
+  $("days").innerHTML = `<tr><td colspan="7" class="muted" style="text-align:left">The first day closes at midnight, sim time.</td></tr>`;
+  $("batTitle").textContent = `SECOND-LIFE · ${cfg.pack.series_cells}S ${cfg.pack.chemistry} · ${cfg.pack.measured_capacity_ah} Ah`;
+  drawCells(cfg.pack.series_cells);
+  snap = twin.snapshot(); sample(snap);
+  $("tRulS").textContent = "";
+}
+
+/* ---------- backend engine (optional) ---------- */
+async function connectBackend() {
+  const url = $("beUrl").value.replace(/\/$/, "");
+  $("beMsg").textContent = "Connecting…";
+  try {
+    const r = await fetch(url + "/solar/sessions", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ config: cfg, speed }) });
+    if (!r.ok) throw new Error(`backend answered ${r.status}`);
+    const j = await r.json();
+    if (backend && backend.es) backend.es.close();
+    const es = new EventSource(`${url}/solar/sessions/${j.session_id}/stream`);
+    backend = { url, sid: j.session_id, es };
+    twin = null; hist = []; nextSample = 0; logs = []; lastLogSeq = 0; dayRows = [];
+    startHourAbs = j.config.site.start_hour;
+    es.addEventListener("snapshot", (e) => { const d = JSON.parse(e.data); snap = normalize(d.snapshot); addLogs(d.events || []); dayRows = d.days || []; renderDays(); });
+    es.addEventListener("tick", (e) => { snap = normalize(JSON.parse(e.data)); sample(snap); });
+    es.addEventListener("log", (e) => addLogs([JSON.parse(e.data)]));
+    es.addEventListener("day_summary", (e) => { dayRows.push(JSON.parse(e.data)); renderDays(); });
+    es.onerror = () => { $("beMsg").textContent = "Stream interrupted. The browser retries automatically; use Restart to return to the in-browser twin."; };
+    $("engState").textContent = "python backend"; $("beMsg").textContent = `Connected · session ${j.session_id}`; $("beBtn").textContent = "Reconnect";
+  } catch (err) {
+    $("beMsg").textContent = `Could not reach ${url}: ${err.message}. Start the server with "python solar_demo_server.py" and open the page from http://localhost:8000, then try again.`;
+  }
+}
+function normalize(s) {  // backend snapshot lacks rise_set; compute it locally
+  if (!s.sun.rise_set) { const doy = Math.floor((Date.parse(s.sim_time.slice(0, 10)) - Date.UTC(+s.sim_time.slice(0, 4), 0, 1)) / 86400000) + 1; s.sun.rise_set = ST.sunTimes(cfg.site.latitude, doy); }
+  return s;
+}
+function beControl(action, value) {
+  if (!backend) return;
+  fetch(`${backend.url}/solar/sessions/${backend.sid}/control`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, value }) }).catch(() => {});
+}
+function dropBackend() { if (backend && backend.es) backend.es.close(); backend = null; $("engState").textContent = "in-browser"; $("beBtn").textContent = "Connect to backend"; }
+
+/* ---------- lifetime ---------- */
+let ltBusy = false;
+const ltColors = () => [css("--muted"), css("--charge"), css("--sun")];
+function runLifetime() {
+  if (ltBusy) return; ltBusy = true; $("ltBtn").disabled = true; $("ltBtn").textContent = "Projecting…";
+  const sc = ST.scenarios(cfg); const runners = sc.map(s => ST.lifetimeRunner(s.cfg, 15)); const done = sc.map(() => false);
+  function tick() {
+    let all = true;
+    runners.forEach((r, i) => { if (!done[i]) { done[i] = r.run(45); all = all && done[i]; } });
+    const prog = runners.reduce((a, r, i) => a + (done[i] ? 1 : r.progress()), 0) / runners.length;
+    $("ltProg").style.width = (prog * 100).toFixed(0) + "%";
+    drawLife(sc, runners.map(r => r.result()));
+    if (!all) setTimeout(tick, 0);
+    else { ltBusy = false; $("ltBtn").disabled = false; $("ltBtn").textContent = "Run again with current measurements"; renderLtCards(sc, runners.map(r => r.result())); }
+  }
+  tick();
+}
+let lastLife = null;
+function drawLife(sc, res) {
+  lastLife = [sc, res];
+  const yrs = Math.max(2, ...res.map(r => (r.weekly.length ? r.weekly[r.weekly.length - 1].day : 0) / 365.25));
+  const x1 = Math.ceil(yrs), eol = cfg.ageing.eol_soh * 100;
+  const y0 = Math.floor((eol - 5) / 5) * 5, y1 = Math.ceil((cfg.pack.measured_capacity_ah / cfg.pack.nominal_capacity_ah * 100 + 2) / 5) * 5;
+  const xt = []; const stepY = x1 > 8 ? 2 : 1; for (let yv = 0; yv <= x1; yv += stepY) xt.push([yv, `${yv} yr`]);
+  const cols = ltColors();
+  chart($("cLife"), { x0: 0, x1, y0, y1, yticks: Array.from({ length: Math.round((y1 - y0) / 5) + 1 }, (_, k) => y0 + 5 * k), yfmt: v => `${v}%`, xticks: xt,
+    hline: { v: eol, label: `End of second life · ${eol.toFixed(0)} % SOH`, color: css("--crit") },
+    series: res.map((r, i) => ({ pts: r.weekly.map(w => [w.day / 365.25, w.soh * 100]), color: cols[i], width: i === 0 ? 1.8 : 2.2, dot: true })) });
+}
+function renderLtCards(sc, res) {
+  const cols = ltColors();
+  $("ltCards").innerHTML = res.map((r, i) => `<div class="lt-card" style="--c:${cols[i]}">
+    <span class="lab">${sc[i].label}</span>
+    <span class="big">${r.years_to_eol != null ? fmt(r.years_to_eol, 1) + " yr" : "15+ yr"}</span>
+    <dl><dt>Light delivered</dt><dd>${fmt(r.energy_delivered_kwh, 0)} kWh</dd>
+        <dt>Nights fully lit</dt><dd>${fmt(r.nights_fully_served_pct, 1)} %</dd>
+        <dt>Cycles added</dt><dd>${fmt(r.efc_added, 0)}</dd>
+        <dt>Resistance at end</dt><dd>${fmt(r.final_resistance_mohm, 0)} mΩ</dd>
+        <dt>CO₂ avoided</dt><dd>${fmt(r.co2_avoided_kg, 0)} kg</dd></dl></div>`).join("");
+}
+
+/* ---------- controls ---------- */
+$("playBtn").addEventListener("click", () => { playing = !playing; $("playBtn").textContent = playing ? "Pause" : "Resume"; $("playBtn").setAttribute("aria-pressed", playing); beControl(playing ? "resume" : "pause"); });
+$("speedSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; speed = +b.dataset.s;
+  $("speedSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); beControl("speed", speed); });
+$("weatherSel").addEventListener("change", () => { const w = $("weatherSel").value; if (twin) twin.setWeather(w); beControl("weather", w); });
+$("skipBtn").addEventListener("click", () => {
+  const h = snap ? snap.hour : 0; let d = (18 - h + 24) % 24; if (d < 0.01) d = 24; const secs = d * 3600;
+  if (twin) advanceSampled(secs, 60); else beControl("skip", secs);
+});
+$("resetBtn").addEventListener("click", () => { dropBackend(); startLocal(readForm()); });
+$("beBtn").addEventListener("click", connectBackend);
+$("fPreset").addEventListener("change", () => { presetKey = $("fPreset").value; const c = ST.merge(configFromPreset(presetKey)); cfg = c; writeForm(c); dropBackend(); startLocal(c); $("ltCards").innerHTML = ""; lastLife = null; renderLifeEmpty(); });
+$("fChem").addEventListener("change", () => { $("fVcv").value = ST.CHEM[$("fChem").value].v_cv_cell.toFixed(2); updateDerived(); });
+$("measForm").addEventListener("input", updateDerived);
+$("measForm").addEventListener("submit", (e) => {
+  e.preventDefault(); const err = $("formErr");
+  try { const c = readForm(); ST.validate(ST.merge(c));
+    if (c.pack.measured_capacity_ah > c.pack.nominal_capacity_ah * 1.2) throw new Error("Measured capacity is more than 120 % of nameplate. Check the units (Ah, not mAh).");
+    if (!(c.ctrl.v_cv_cell > 2.5 && c.ctrl.v_cv_cell <= 4.25)) throw new Error("Charge stop voltage must be between 2.5 and 4.25 V per cell.");
+    err.hidden = true; dropBackend(); startLocal(c); $("ltCards").innerHTML = ""; lastLife = null; renderLifeEmpty();
+  } catch (ex) { err.textContent = ex.message; err.hidden = false; }
+});
+function renderLifeEmpty() {
+  const { ctx, w, h } = setupCanvas($("cLife"));
+  ctx.fillStyle = css("--muted"); ctx.font = `13px ${css("--f-body")}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("Run the projection to see this battery's SOH, year by year, under three charging strategies.", w / 2, h / 2);
+  $("ltProg").style.width = "0%";
+}
+
+/* ---------- main loop ---------- */
+let last = performance.now(), chartT = 0, canonT = 0;
+function frame(now) {
+  const dtw = Math.min(0.1, (now - last) / 1000); last = now;
+  if (twin && playing) { advanceSampled(speed * dtw); addLogs(twin.events);
+    if (twin.days.length !== dayRows.length) { dayRows = twin.days.slice(); renderDays(); } }
+  if (snap) { renderScene(snap, playing ? dtw : 0); renderTiles(snap); renderLog(); }
+  chartT += dtw; canonT += dtw;
+  if (chartT > 0.25) { chartT = 0; renderCharts(); }
+  if (canonT > 0.5 && snap) { canonT = 0;
+    $("canon").textContent = JSON.stringify(twin ? twin.canonical() : canonFromSnap(snap), null, 2); }
+  requestAnimationFrame(frame);
+}
+function canonFromSnap(s) { const b = s.battery; return { battery_id: "SOLAR-TWIN-01", timestamp: s.sim_time, voltage: +b.voltage_v.toFixed(3), current: +b.current_a.toFixed(4), temperature: +s.temps.battery_c.toFixed(2), capacity: +b.capacity_ah.toFixed(4), cycle: Math.floor(b.efc), internal_resistance: +(b.resistance_mohm / 1000).toFixed(5), cell_v_min: b.cell_v_min, cell_v_max: b.cell_v_max, source: "SOLAR_TWIN" }; }
+window.addEventListener("resize", () => { renderCharts(); if (lastLife) drawLife(...lastLife); else renderLifeEmpty(); });
+if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { renderCharts(); if (lastLife) drawLife(...lastLife); });
+$("ltBtn").addEventListener("click", runLifetime);
+
+/* ---------- boot ---------- */
+fillPresetSelect();
+cfg = ST.merge(configFromPreset(presetKey));
+writeForm(cfg);
+startLocal(cfg);
+renderLifeEmpty();
+// open in a lively state: advance to mid-morning so the panel is already charging
+advanceSampled(3.5 * 3600);
+// if served by the demo backend, offer it
+if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(location.origin)) $("beUrl").value = location.origin;
+requestAnimationFrame((t) => { last = t; frame(t); });
+})();
+</script>
