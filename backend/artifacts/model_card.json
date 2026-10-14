@@ -1,0 +1,149 @@
+{
+  "model_name": "XGBoost SOH Estimator",
+  "version": "v0.1",
+  "status": "DEMO MODEL \u2014 trained on simulated data",
+  "training_status": "Prototype",
+  "data_source": "SIMULATED",
+  "dataset": "RE-BAT simulated population (84 modules)",
+  "trained_at": "2026-10-08T18:48:22+00:00",
+  "library_versions": {
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  },
+  "features": [
+    "v_cell_mean",
+    "v_cell_min",
+    "v_cell_max",
+    "v_cell_std",
+    "c_rate",
+    "t_mean",
+    "t_rise",
+    "t_rise_rate",
+    "thermal_response",
+    "dv_dq",
+    "dv_dt",
+    "discharge_duration_s",
+    "ah_norm",
+    "energy_norm",
+    "ir_cell_mohm",
+    "v_recovery_cell_mv",
+    "soc_start_est",
+    "soc_end_est",
+    "soc_window",
+    "capacity_est_norm",
+    "cycle",
+    "cell_imbalance_mv"
+  ],
+  "split": {
+    "method": "battery-level GroupShuffleSplit 70/15/15",
+    "n_batteries": {
+      "train": 58,
+      "val": 13,
+      "test": 13
+    },
+    "n_samples": {
+      "train": 1740,
+      "val": 390,
+      "test": 390
+    },
+    "test_battery_ids": [
+      "SIM-000",
+      "SIM-004",
+      "SIM-009",
+      "SIM-012",
+      "SIM-028",
+      "SIM-030",
+      "SIM-035",
+      "SIM-039",
+      "SIM-040",
+      "SIM-047",
+      "SIM-049",
+      "SIM-073",
+      "SIM-076"
+    ]
+  },
+  "metrics_test": {
+    "xgboost": {
+      "MAE": 1.132,
+      "RMSE": 1.616,
+      "R2": 0.9835,
+      "n": 390
+    },
+    "baseline_ridge": {
+      "MAE": 2.623,
+      "RMSE": 3.511,
+      "R2": 0.9221,
+      "n": 390
+    },
+    "interval_90": {
+      "coverage": 0.862,
+      "mean_width": 5.866,
+      "target_coverage": 0.9
+    },
+    "per_archetype": {
+      "early_knee": {
+        "MAE": 1.198,
+        "RMSE": 1.736,
+        "R2": 0.9933,
+        "n": 30
+      },
+      "fast_fade": {
+        "MAE": 1.656,
+        "RMSE": 2.201,
+        "R2": 0.9731,
+        "n": 30
+      },
+      "high_resistance": {
+        "MAE": 1.647,
+        "RMSE": 2.163,
+        "R2": 0.5993,
+        "n": 60
+      },
+      "normal": {
+        "MAE": 0.847,
+        "RMSE": 1.116,
+        "R2": 0.9874,
+        "n": 180
+      },
+      "thermal": {
+        "MAE": 1.162,
+        "RMSE": 1.757,
+        "R2": 0.9596,
+        "n": 90
+      }
+    }
+  },
+  "best_iteration": 1170,
+  "conformal_q": 0.5962943272047564,
+  "quantiles": [
+    0.05,
+    0.5,
+    0.95
+  ],
+  "ood_threshold": -0.5882700562310766,
+  "spot_variant": {
+    "features": [
+      "c_rate",
+      "t_mean",
+      "t_rise",
+      "ir_cell_mohm",
+      "capacity_est_norm",
+      "cycle"
+    ],
+    "conformal_q": -0.0026463642855469958,
+    "metrics_test": {
+      "xgboost": {
+        "MAE": 3.334,
+        "RMSE": 4.832,
+        "R2": 0.8524,
+        "n": 390
+      },
+      "interval_90": {
+        "coverage": 0.862,
+        "mean_width": 16.198,
+        "target_coverage": 0.9
+      }
+    }
+  },
+  "caveat": "Metrics are measured on held-out SIMULATED batteries. They show the pipeline works; they are NOT evidence of accuracy on real retired EV batteries."
+}

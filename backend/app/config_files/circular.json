@@ -1,0 +1,77 @@
+{
+  "_note": "Circular-economy configuration. Composition shares are typical published values for each cell format (approx. +/-20 %); recovery yields are typical hydrometallurgical results. Replace with teardown weights and recycler data for real packs.",
+  "default_pack": {"chemistry": "NMC532", "cell_format": "cylindrical_18650"},
+  "chemistries": {
+    "NMC532": {"label": "NMC 532 (LiNi0.5Mn0.3Co0.2O2)", "family": "NMC", "cell_nominal_v": 3.6, "cell_full_v": 4.2, "cathode": {"Li": 1, "Ni": 0.5, "Mn": 0.3, "Co": 0.2, "O": 2}},
+    "NMC622": {"label": "NMC 622 (LiNi0.6Mn0.2Co0.2O2)", "family": "NMC", "cell_nominal_v": 3.6, "cell_full_v": 4.2, "cathode": {"Li": 1, "Ni": 0.6, "Mn": 0.2, "Co": 0.2, "O": 2}},
+    "NMC811": {"label": "NMC 811 (LiNi0.8Mn0.1Co0.1O2)", "family": "NMC", "cell_nominal_v": 3.6, "cell_full_v": 4.2, "cathode": {"Li": 1, "Ni": 0.8, "Mn": 0.1, "Co": 0.1, "O": 2}},
+    "NCA":    {"label": "NCA (LiNi0.8Co0.15Al0.05O2)", "family": "NCA", "cell_nominal_v": 3.6, "cell_full_v": 4.2, "cathode": {"Li": 1, "Ni": 0.8, "Co": 0.15, "Al": 0.05, "O": 2}},
+    "LFP":    {"label": "LFP (LiFePO4)", "family": "LFP", "cell_nominal_v": 3.2, "cell_full_v": 3.6, "cathode": {"Li": 1, "Fe": 1, "P": 1, "O": 4}}
+  },
+  "cell_formats": {
+    "cylindrical_18650": {"label": "18650 cylindrical", "cell_mass_g": 46, "cell_ah": 2.5,
+      "makeup": {"cathode": 0.30, "graphite": 0.16, "copper_foil": 0.10, "aluminium_foil": 0.05, "aluminium_case": 0.00, "steel_can": 0.18, "electrolyte": 0.13, "other": 0.08}},
+    "cylindrical_21700": {"label": "21700 cylindrical", "cell_mass_g": 68, "cell_ah": 4.8,
+      "makeup": {"cathode": 0.31, "graphite": 0.17, "copper_foil": 0.10, "aluminium_foil": 0.05, "aluminium_case": 0.00, "steel_can": 0.16, "electrolyte": 0.13, "other": 0.08}},
+    "pouch_ev": {"label": "EV pouch cell (~60 Ah)", "cell_mass_g": 900, "cell_ah": 60,
+      "makeup": {"cathode": 0.36, "graphite": 0.18, "copper_foil": 0.13, "aluminium_foil": 0.06, "aluminium_case": 0.06, "steel_can": 0.00, "electrolyte": 0.14, "other": 0.07}},
+    "prismatic_ev": {"label": "EV prismatic cell (~94 Ah)", "cell_mass_g": 2100, "cell_ah": 94,
+      "makeup": {"cathode": 0.33, "graphite": 0.17, "copper_foil": 0.12, "aluminium_foil": 0.06, "aluminium_case": 0.12, "steel_can": 0.00, "electrolyte": 0.13, "other": 0.07}},
+    "prismatic_lfp_280": {"label": "LFP prismatic cell (280 Ah)", "cell_mass_g": 5400, "cell_ah": 280,
+      "makeup": {"cathode": 0.33, "graphite": 0.16, "copper_foil": 0.11, "aluminium_foil": 0.06, "aluminium_case": 0.14, "steel_can": 0.00, "electrolyte": 0.13, "other": 0.07}}
+  },
+  "recovery_yield": {"Li": 0.85, "Ni": 0.95, "Co": 0.95, "Mn": 0.90, "Cu": 0.95, "Al": 0.90, "Fe": 0.95, "P": 0.80, "C": 0.80},
+  "materials": {
+    "Li": {"name": "Lithium", "color": "#B6F23A", "critical": true, "part": "Cathode", "role": "Carries the charge between the electrodes",
+           "recovered_as": "Lithium carbonate / hydroxide", "new_battery_use": "New cathode material for EV cells",
+           "india": "Not produced commercially in India; battery-grade lithium is imported. Global refining is concentrated in China."},
+    "Ni": {"name": "Nickel", "color": "#4FC3E0", "critical": true, "part": "Cathode", "role": "Raises energy density (driving range)",
+           "recovered_as": "Nickel sulphate", "new_battery_use": "Precursor for new NMC/NCA cathode",
+           "india": "Very little primary nickel production in India; battery-grade nickel sulphate is imported."},
+    "Co": {"name": "Cobalt", "color": "#7B8CFF", "critical": true, "part": "Cathode", "role": "Keeps the cathode structure stable",
+           "recovered_as": "Cobalt sulphate", "new_battery_use": "Precursor for new NMC/NCA cathode",
+           "india": "No primary cobalt mining in India; fully import-dependent. Global refining is concentrated in China."},
+    "Mn": {"name": "Manganese", "color": "#C792EA", "critical": true, "part": "Cathode", "role": "Adds stability and lowers cost",
+           "recovered_as": "Manganese sulphate", "new_battery_use": "Precursor for new NMC cathode",
+           "india": "Ore is mined in India, but battery-grade manganese sulphate processing is concentrated in China."},
+    "Fe": {"name": "Iron", "color": "#E07A5F", "critical": false, "part": "Cathode (LFP) / steel can", "role": "LFP cathode backbone, or the steel can of cylindrical cells",
+           "recovered_as": "Iron phosphate / steel scrap", "new_battery_use": "New LFP cathode, or steel",
+           "india": "Produced in India."},
+    "P":  {"name": "Phosphorus", "color": "#F2B33D", "critical": false, "part": "Cathode (LFP)", "role": "Phosphate frame of the LFP cathode",
+           "recovered_as": "Iron phosphate", "new_battery_use": "New LFP cathode",
+           "india": "Phosphate rock is largely imported."},
+    "C":  {"name": "Graphite", "color": "#9AA6BD", "critical": true, "part": "Anode", "role": "Stores lithium when the battery is charged",
+           "recovered_as": "Regenerated graphite", "new_battery_use": "New anode material",
+           "india": "Some natural graphite is mined in India, but battery-grade anode graphite processing is concentrated in China."},
+    "Cu": {"name": "Copper", "color": "#E39B5B", "critical": false, "part": "Anode foil", "role": "Current collector of the anode",
+           "recovered_as": "Copper granules", "new_battery_use": "New copper foil",
+           "india": "Refined in India; concentrate is largely imported."},
+    "Al": {"name": "Aluminium", "color": "#D7DEE8", "critical": false, "part": "Cathode foil / casing", "role": "Current collector of the cathode, cell casing",
+           "recovered_as": "Aluminium scrap", "new_battery_use": "New foil and casings",
+           "india": "Produced in India."}
+  },
+  "non_recovered": {
+    "O": {"name": "Oxygen (in cathode)", "color": "#3A4B6B"},
+    "electrolyte": {"name": "Electrolyte", "color": "#2A3B5C"},
+    "other": {"name": "Separator, binder, plastics", "color": "#1F2E4A"}
+  },
+  "process": [
+    {"step": "Safe discharge", "detail": "Pack discharged to 0 V so it can be opened safely"},
+    {"step": "Dismantle", "detail": "Casing, wiring and BMS removed; BMS goes to e-waste"},
+    {"step": "Shred and sort", "detail": "Copper, aluminium and steel separated; the rest becomes black mass"},
+    {"step": "Leach (hydrometallurgy)", "detail": "Black mass dissolved in acid"},
+    {"step": "Separate and precipitate", "detail": "Li, Ni, Co, Mn recovered as battery-grade salts"},
+    {"step": "New cathode", "detail": "Salts become precursor and then cathode powder"},
+    {"step": "New EV cell", "detail": "Recycled materials go back into a new battery"}
+  ],
+  "loop": ["EV use", "Collected", "RE-BAT tested", "Second life", "Retest", "Recycled", "Minerals", "New EV cell"],
+  "policy": "India's Battery Waste Management Rules 2022: 90% material recovery for EV batteries from 2026-27; producers must use domestically recycled material (5% in 2027-28 rising to 20% by 2030-31).",
+  "reuse": {
+    "depth_of_discharge": 0.8,
+    "default_efficiency": 0.90,
+    "solar": {"peak_sun_hours": 5.0, "panel_derate": 0.75, "home_daily_wh": 100},
+    "factory": {"load_w": 1000, "target_minutes": 30},
+    "household": {"load_w": 60, "target_hours": 4},
+    "street_light": {"lamp_w": 5, "night_hours": 12, "smart_duty": 0.30}
+  }
+}

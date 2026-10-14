@@ -1,0 +1,501 @@
+{
+  "_note": "PROTOTYPE requirement profiles. 'poor'/'good' are the points where a criterion's fit is 0 and 1. kind=min: higher is better; kind=max: lower is better. Tune with domain experts and application-specific standards before real use. Final score = fit \u00d7 value factor of the application's value tier (prefers higher-value reuse when the battery qualifies).",
+  "status_bands": {
+    "highly_suitable": 80,
+    "suitable": 65,
+    "conditional": 50
+  },
+  "second_life": [
+    {
+      "id": "solar_storage",
+      "name": "Solar Energy Storage",
+      "short": "Solar Storage",
+      "description": "Daily PV shifting at low C-rate (0.2\u20130.5C); values cycle life and efficiency over peak power.",
+      "duty": "Daily cycling, low rate",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 60,
+          "good": 80,
+          "weight": 3
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 300,
+          "good": 1800,
+          "weight": 3
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 0.5,
+          "good": 1.5,
+          "weight": 1
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 20,
+          "good": 70,
+          "weight": 2
+        },
+        {
+          "metric": "efficiency",
+          "kind": "min",
+          "poor": 0.88,
+          "good": 0.955,
+          "weight": 2
+        },
+        {
+          "metric": "degradation_rate",
+          "kind": "max",
+          "poor": 3.0,
+          "good": 0.8,
+          "weight": 2
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "ne",
+          "value": "HIGH",
+          "reason": "High thermal risk is not acceptable for unattended outdoor storage"
+        }
+      ],
+      "value_tier": 2
+    },
+    {
+      "id": "residential_backup",
+      "name": "Residential Backup",
+      "short": "Home Backup",
+      "description": "Occasional outage backup indoors; needs appliance surge power and conservative thermal behaviour.",
+      "duty": "Infrequent deep discharge, moderate surge",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 65,
+          "good": 85,
+          "weight": 2
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 150,
+          "good": 800,
+          "weight": 1.5
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 1.0,
+          "good": 4.0,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 30,
+          "good": 75,
+          "weight": 3
+        },
+        {
+          "metric": "imbalance_mv",
+          "kind": "max",
+          "poor": 120,
+          "good": 30,
+          "weight": 1
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "not_in",
+          "value": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "reason": "Requires LOW thermal risk (indoor / high-rate / hot-shelter duty)"
+        }
+      ],
+      "value_tier": 2
+    },
+    {
+      "id": "commercial_storage",
+      "name": "Commercial Stationary Storage",
+      "short": "Commercial ESS",
+      "description": "Peak shaving / demand charge management; high value, high reliability, frequent cycling.",
+      "duty": "Daily cycling, 0.5\u20131C",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 75,
+          "good": 90,
+          "weight": 3
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 800,
+          "good": 2500,
+          "weight": 3
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 0.8,
+          "good": 2.0,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 30,
+          "good": 70,
+          "weight": 2
+        },
+        {
+          "metric": "efficiency",
+          "kind": "min",
+          "poor": 0.9,
+          "good": 0.96,
+          "weight": 2
+        },
+        {
+          "metric": "degradation_rate",
+          "kind": "max",
+          "poor": 2.5,
+          "good": 0.8,
+          "weight": 2
+        },
+        {
+          "metric": "confidence",
+          "kind": "min",
+          "poor": 70,
+          "good": 92,
+          "weight": 1
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "ne",
+          "value": "HIGH",
+          "reason": "High thermal risk"
+        }
+      ],
+      "value_tier": 3
+    },
+    {
+      "id": "telecom_backup",
+      "name": "Telecom Backup",
+      "short": "Telecom Backup",
+      "description": "Float-charged standby in warm shelters; reliability and thermal robustness dominate, cycling is rare.",
+      "duty": "Standby, rare discharge, elevated ambient",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 65,
+          "good": 85,
+          "weight": 2
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 100,
+          "good": 600,
+          "weight": 1
+        },
+        {
+          "metric": "confidence",
+          "kind": "min",
+          "poor": 70,
+          "good": 92,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 40,
+          "good": 80,
+          "weight": 3
+        },
+        {
+          "metric": "imbalance_mv",
+          "kind": "max",
+          "poor": 100,
+          "good": 25,
+          "weight": 1.5
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 0.5,
+          "good": 1.5,
+          "weight": 1
+        },
+        {
+          "metric": "degradation_rate",
+          "kind": "max",
+          "poor": 3.0,
+          "good": 1.0,
+          "weight": 1
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "not_in",
+          "value": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "reason": "Requires LOW thermal risk (indoor / high-rate / hot-shelter duty)"
+        }
+      ],
+      "value_tier": 2
+    },
+    {
+      "id": "ups_high_power",
+      "name": "UPS / High-Power Backup",
+      "short": "High-Power UPS",
+      "description": "Short, high-rate bridging discharges (3\u201310C); internal resistance and heat under load are decisive.",
+      "duty": "Rare, short, high-rate bursts",
+      "criteria": [
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 3.0,
+          "good": 8.0,
+          "weight": 4
+        },
+        {
+          "metric": "ir_cell_mohm",
+          "kind": "max",
+          "poor": 60,
+          "good": 25,
+          "weight": 3
+        },
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 70,
+          "good": 85,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 40,
+          "good": 80,
+          "weight": 3
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 100,
+          "good": 500,
+          "weight": 1
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "not_in",
+          "value": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "reason": "Requires LOW thermal risk (indoor / high-rate / hot-shelter duty)"
+        }
+      ],
+      "value_tier": 3
+    },
+    {
+      "id": "microgrid",
+      "name": "Microgrid Storage",
+      "short": "Microgrid",
+      "description": "Islanded/community grids: daily cycling plus load-following power, long service life wanted.",
+      "duty": "Daily cycling, variable rate",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 70,
+          "good": 88,
+          "weight": 2
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 500,
+          "good": 2200,
+          "weight": 3
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 1.0,
+          "good": 4.0,
+          "weight": 2
+        },
+        {
+          "metric": "efficiency",
+          "kind": "min",
+          "poor": 0.88,
+          "good": 0.95,
+          "weight": 2
+        },
+        {
+          "metric": "degradation_rate",
+          "kind": "max",
+          "poor": 2.5,
+          "good": 1.0,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 30,
+          "good": 70,
+          "weight": 2
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "ne",
+          "value": "HIGH",
+          "reason": "High thermal risk"
+        }
+      ],
+      "value_tier": 3
+    },
+    {
+      "id": "low_power_stationary",
+      "name": "Low-Power Stationary",
+      "short": "Low-Power Stationary",
+      "description": "Street lights, sensors, small off-grid loads; tolerant of reduced capacity and modest power.",
+      "duty": "Light daily cycling, <0.3C",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "min",
+          "poor": 50,
+          "good": 70,
+          "weight": 2
+        },
+        {
+          "metric": "power_c_capability",
+          "kind": "min",
+          "poor": 0.2,
+          "good": 0.5,
+          "weight": 1
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "min",
+          "poor": 20,
+          "good": 60,
+          "weight": 2
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "min",
+          "poor": 50,
+          "good": 300,
+          "weight": 1
+        }
+      ],
+      "gates": [
+        {
+          "metric": "thermal_risk_level",
+          "op": "ne",
+          "value": "HIGH",
+          "reason": "High thermal risk"
+        }
+      ],
+      "value_tier": 1
+    }
+  ],
+  "pathways": [
+    {
+      "id": "further_diagnostics",
+      "name": "Further Diagnostic Evaluation",
+      "short": "Further Diagnostics",
+      "description": "Evidence is insufficient or the top options are too close to call \u2014 measure more before routing.",
+      "criteria": [
+        {
+          "metric": "confidence",
+          "kind": "max",
+          "poor": 92,
+          "good": 60,
+          "weight": 3
+        },
+        {
+          "metric": "decision_margin",
+          "kind": "max",
+          "poor": 20,
+          "good": 3,
+          "weight": 1.5
+        },
+        {
+          "metric": "missing_evidence",
+          "kind": "min",
+          "poor": 0,
+          "good": 4,
+          "weight": 1.5
+        }
+      ],
+      "gates": [],
+      "value_tier": null
+    },
+    {
+      "id": "recycling",
+      "name": "Recycling / Material Recovery",
+      "short": "Recycling",
+      "description": "Remaining value is best captured as materials (or component recovery) rather than reuse.",
+      "criteria": [
+        {
+          "metric": "soh",
+          "kind": "max",
+          "poor": 72,
+          "good": 55,
+          "weight": 3
+        },
+        {
+          "metric": "rul_cycles",
+          "kind": "max",
+          "poor": 400,
+          "good": 50,
+          "weight": 2
+        },
+        {
+          "metric": "thermal_score",
+          "kind": "max",
+          "poor": 50,
+          "good": 10,
+          "weight": 2
+        },
+        {
+          "metric": "ir_cell_mohm",
+          "kind": "min",
+          "poor": 50,
+          "good": 120,
+          "weight": 1
+        }
+      ],
+      "gates": [],
+      "value_tier": null
+    }
+  ],
+  "value_factor": {
+    "1": 0.8,
+    "2": 0.93,
+    "3": 1.0
+  }
+}

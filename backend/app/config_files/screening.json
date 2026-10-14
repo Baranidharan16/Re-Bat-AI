@@ -1,0 +1,11 @@
+{
+  "label": "Prototype screening ranges — final suitability requires application-specific validation and safety assessment.",
+  "ranges": [
+    {"min": 90, "max": 100, "label": "Higher-demand / higher-value second-life applications"},
+    {"min": 80, "max": 90, "label": "Residential storage / solar / stationary storage"},
+    {"min": 70, "max": 80, "label": "Solar storage / backup / lower-demand stationary applications"},
+    {"min": 60, "max": 70, "label": "Lower-rate stationary / selected backup applications, subject to safety and performance validation"},
+    {"min": 0, "max": 60, "label": "Further diagnostic evaluation / component recovery / recycling pathway"}
+  ],
+  "note": "SOH screening is context only. Routing uses the full fingerprint (SOH, resistance, thermal, power, RUL, degradation, safety)."
+}

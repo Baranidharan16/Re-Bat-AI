@@ -1,0 +1,142 @@
+{
+  "_note": "Example EV battery packs for the 3D explorer. Pack figures are public numbers where available; masses are estimates (marked) from cell format or from energy at typical cell energy density. Layout is illustrative.",
+  "cell_to_pack_mass_ratio": 0.65,
+  "pack_parts": {
+    "_note": "Share of the NON-cell pack mass (housing, cooling, wiring, BMS). Typical values for a liquid-cooled EV pack.",
+    "top_cover": {
+      "name": "Top cover",
+      "share": 0.3,
+      "material": "Al",
+      "material_name": "Aluminium / steel sheet",
+      "role": "Seals the pack against water and dust, protects it in a crash."
+    },
+    "cooling": {
+      "name": "Cooling plate",
+      "share": 0.18,
+      "material": "Al",
+      "material_name": "Aluminium with coolant channels",
+      "role": "Liquid coolant pulls heat out of the cells to keep them at 20\u201340 \u00b0C."
+    },
+    "busbars": {
+      "name": "Busbars & connectors",
+      "share": 0.12,
+      "material": "Cu",
+      "material_name": "Copper busbars, high-voltage cables",
+      "role": "Join cells in series and parallel and carry the high-voltage current to the motor."
+    },
+    "bms": {
+      "name": "BMS",
+      "share": 0.04,
+      "material": "E-waste",
+      "material_name": "Circuit boards, copper, solder, chips",
+      "role": "Monitors every cell's voltage, current and temperature; balances cells; stops over-charge and over-discharge."
+    },
+    "base_frame": {
+      "name": "Base frame",
+      "share": 0.36,
+      "material": "Al",
+      "material_name": "Aluminium / steel tray",
+      "role": "Holds the modules, takes crash loads, bolts the pack to the car floor."
+    }
+  },
+  "models": {
+    "rebat_rig": {
+      "name": "RE-BAT test module",
+      "vehicle": "Our ESP32 rig (repurposed cells)",
+      "chemistry": "NMC532",
+      "cell_format": "cylindrical_18650",
+      "cell_shape": "cylindrical",
+      "pack_kwh": 0.0275,
+      "nominal_v": 10.8,
+      "cells": 3,
+      "config": "3S1P",
+      "modules": 1,
+      "visual": {
+        "modules": [
+          1,
+          1
+        ],
+        "cells": [
+          3,
+          1
+        ]
+      },
+      "source": "Measured on the rig",
+      "mass_note": "3 \u00d7 46 g 18650 cells"
+    },
+    "tata_nexon_ev_45": {
+      "name": "Tata Nexon EV 45 kWh",
+      "vehicle": "Tata Nexon EV (Long Range)",
+      "chemistry": "LFP",
+      "cell_format": "prismatic_lfp_280",
+      "cell_shape": "prismatic",
+      "pack_kwh": 45.0,
+      "nominal_v": null,
+      "cells": null,
+      "config": "not published",
+      "modules": null,
+      "visual": {
+        "modules": [
+          2,
+          2
+        ],
+        "cells": [
+          8,
+          3
+        ]
+      },
+      "cell_mass_from_energy_wh_per_kg": 165,
+      "source": "45 kWh LFP prismatic pack (Tata Motors, 2024)",
+      "mass_note": "cell mass estimated from 45 kWh at ~165 Wh/kg (LFP cell level)"
+    },
+    "nissan_leaf_40": {
+      "name": "Nissan Leaf 40 kWh",
+      "vehicle": "Nissan Leaf (2018+)",
+      "chemistry": "NMC532",
+      "cell_format": "pouch_ev",
+      "cell_shape": "pouch",
+      "pack_kwh": 40.0,
+      "nominal_v": 350,
+      "cells": 192,
+      "config": "24 modules \u00d7 8 pouch cells",
+      "modules": 24,
+      "visual": {
+        "modules": [
+          4,
+          6
+        ],
+        "cells": [
+          8,
+          1
+        ]
+      },
+      "cell_mass_from_energy_wh_per_kg": 225,
+      "source": "192 NMC pouch cells in 24 modules of 8 (InsideEVs)",
+      "mass_note": "cell mass estimated from 40 kWh at ~225 Wh/kg (NMC pouch cell level)"
+    },
+    "tesla_model3_lr": {
+      "name": "Tesla Model 3 Long Range (2017)",
+      "vehicle": "Tesla Model 3",
+      "chemistry": "NCA",
+      "cell_format": "cylindrical_21700",
+      "cell_shape": "cylindrical",
+      "pack_kwh": 74.0,
+      "nominal_v": 350,
+      "cells": 4416,
+      "config": "4 modules (2 \u00d7 23 + 2 \u00d7 25 bricks of 46 cells)",
+      "modules": 4,
+      "visual": {
+        "modules": [
+          4,
+          1
+        ],
+        "cells": [
+          12,
+          92
+        ]
+      },
+      "source": "4,416 \u00d7 2170 cells, 4 modules, 74 kWh (Electrek); NCA chemistry widely reported",
+      "mass_note": "4,416 \u00d7 68 g 2170 cells"
+    }
+  }
+}

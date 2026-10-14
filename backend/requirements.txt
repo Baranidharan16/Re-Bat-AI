@@ -1,0 +1,15 @@
+# RE-BAT AI backend — Python 3.10+
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+python-multipart>=0.0.9
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+scikit-learn>=1.4
+xgboost>=2.1          # multi-quantile regression (reg:quantileerror)
+joblib>=1.3
+# optional
+# torch               # only to train the temporal 1D-CNN (app/ml/temporal_model.py)
+# shap                # not required: TreeSHAP comes from XGBoost pred_contribs
+# pytest httpx        # tests

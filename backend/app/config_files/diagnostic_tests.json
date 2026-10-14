@@ -1,0 +1,70 @@
+{
+  "_note": "Diagnostic test catalog used by the adaptive-testing engine. 'resolves' lists the uncertainty sources a test addresses; 'overrides' lists features whose new measurement replaces earlier evidence. Hardware execution must be enforced by the rig's own protection (BMS, fuse, thermal cut-off) — the AI only requests tests.",
+  "tests": [
+    {
+      "id": "pulse_test", "name": "Pulse Discharge Test", "duration_min": 3,
+      "description": "Rest, then a 2C current pulse for 20 s and 30 s relaxation. Measures DC internal resistance and voltage recovery.",
+      "resolves": ["ir_missing", "power_uncertain", "ood"],
+      "overrides": ["ir_cell_mohm", "v_recovery_cell_mv"],
+      "hardware_command": {"cmd": "PULSE", "pulse_c": 2.0, "pulse_s": 20, "rest_s": 60},
+      "sim": {"include_pulse": true, "soc_start": "keep", "window": 0.08, "c_rate": 0.5, "rest_end_s": 120}
+    },
+    {
+      "id": "full_discharge", "name": "Full Capacity Discharge", "duration_min": 130,
+      "description": "Full CC discharge at 0.5C from full charge to cut-off with rests before and after. Direct capacity measurement.",
+      "resolves": ["capacity_window", "soh_interval_wide", "no_rest", "ood"],
+      "overrides": ["v_cell_mean", "v_cell_min", "v_cell_max", "v_cell_std", "c_rate", "dv_dq", "dv_dt",
+                    "discharge_duration_s", "ah_norm", "energy_norm", "soc_start_est", "soc_end_est",
+                    "soc_window", "capacity_est_norm", "t_mean", "t_rise", "t_rise_rate", "thermal_response", "cell_imbalance_mv"],
+      "hardware_command": {"cmd": "DISCHARGE", "c_rate": 0.5, "soc_end": 0.0, "rest_s": 300},
+      "sim": {"include_pulse": true, "soc_start": 1.0, "soc_end": 0.0, "c_rate": 0.5, "rest_end_s": 300}
+    },
+    {
+      "id": "thermal_observation", "name": "Thermal Observation Run", "duration_min": 45,
+      "description": "1C discharge segment with temperature logging at 1 Hz to characterise heating per unit load.",
+      "resolves": ["temp_missing", "thermal_uncertain"],
+      "overrides": ["t_mean", "t_rise", "t_rise_rate", "thermal_response"],
+      "hardware_command": {"cmd": "THERMAL", "c_rate": 1.0, "duration_s": 2700, "log_hz": 1},
+      "sim": {"include_pulse": false, "soc_start": "keep", "window": 0.6, "c_rate": 1.0, "rest_end_s": 60, "force_temp": true}
+    },
+    {
+      "id": "rest_ocv", "name": "OCV Relaxation Check", "duration_min": 20,
+      "description": "Short discharge followed by a 20 min rest to read relaxed open-circuit voltage (SOC window anchor).",
+      "resolves": ["no_rest"],
+      "overrides": ["soc_end_est", "soc_window", "capacity_est_norm", "v_recovery_cell_mv"],
+      "hardware_command": {"cmd": "REST", "rest_s": 1200},
+      "sim": {"include_pulse": false, "soc_start": "keep", "window": 0.3, "c_rate": 0.5, "rest_end_s": 600}
+    },
+    {
+      "id": "cell_balance_scan", "name": "Cell Balance Scan", "duration_min": 10,
+      "description": "Per-cell voltage measurement via balance taps under load. Requires cell-tap wiring on the rig.",
+      "resolves": ["imbalance_missing"],
+      "overrides": ["cell_imbalance_mv"],
+      "hardware_command": {"cmd": "CELL_SCAN"},
+      "sim": {"include_pulse": false, "soc_start": "keep", "window": 0.15, "c_rate": 0.5, "rest_end_s": 60, "force_cells": true}
+    },
+    {
+      "id": "extended_cycle", "name": "Extended Charge/Discharge Cycle", "duration_min": 300,
+      "description": "Full charge + full discharge with rests. Measures coulombic efficiency and adds an ageing-trend point.",
+      "resolves": ["rul_history_short", "efficiency_unmeasured", "capacity_window", "soh_interval_wide"],
+      "overrides": ["v_cell_mean", "v_cell_min", "v_cell_max", "v_cell_std", "c_rate", "dv_dq", "dv_dt",
+                    "discharge_duration_s", "ah_norm", "energy_norm", "soc_start_est", "soc_end_est",
+                    "soc_window", "capacity_est_norm"],
+      "hardware_command": {"cmd": "CYCLE", "c_rate": 0.5, "cycles": 1},
+      "sim": {"include_pulse": true, "soc_start": 1.0, "soc_end": 0.0, "c_rate": 0.5, "rest_end_s": 300, "include_charge": true, "advance_cycles": 1}
+    }
+  ],
+  "uncertainty_sources": {
+    "ir_missing": {"severity": 3, "message": "Internal resistance behaviour is insufficiently characterised (no load step / pulse in the data)."},
+    "power_uncertain": {"severity": 2, "message": "Power capability is inferred, not measured — it decides between high-power and energy applications."},
+    "capacity_window": {"severity": 3, "message": "Only a narrow SOC window was discharged, so usable capacity is extrapolated."},
+    "soh_interval_wide": {"severity": 3, "message": "The SOH prediction interval is wide relative to application thresholds."},
+    "no_rest": {"severity": 1, "message": "No relaxation period after load — end-of-test OCV/SOC anchor is missing."},
+    "temp_missing": {"severity": 3, "message": "No temperature data — thermal behaviour and safety margin cannot be assessed."},
+    "thermal_uncertain": {"severity": 2, "message": "Temperature rise was measured over too little load to characterise heating."},
+    "imbalance_missing": {"severity": 1, "message": "Per-cell voltages were not measured — cell imbalance unknown."},
+    "rul_history_short": {"severity": 2, "message": "Too few ageing points for a battery-specific degradation fit (population prior used)."},
+    "efficiency_unmeasured": {"severity": 1, "message": "Round-trip efficiency is estimated from resistance, not measured."},
+    "ood": {"severity": 3, "message": "Measurements fall outside the model's training distribution."}
+  }
+}

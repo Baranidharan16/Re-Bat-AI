@@ -1,0 +1,29 @@
+node_modules/
+.venv/
+*/.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+test_venv/
+
+# Database and runtime state
+backend/data/rebat.sqlite3*
+backend/data/esp32.json
+
+# Environment variables & secrets (Gemini API key)
+backend/.env
+.env
+.env.local
+.env.*.local
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
