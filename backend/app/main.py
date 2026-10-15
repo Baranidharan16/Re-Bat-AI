@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
+from app.api.solar_routes import router as solar_router
 from app.config import APP_NAME, APP_VERSION
 from app.db import get_con
 from app.ml.predict import ModelNotTrainedError
@@ -23,6 +24,7 @@ app = FastAPI(title=f"{APP_NAME} API", version=APP_VERSION,
               description="AI decision engine for second-life EV batteries. Demo outputs are clearly labelled SIMULATED.")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.include_router(router)
+app.include_router(solar_router)
 
 
 @app.on_event("startup")
@@ -68,6 +70,16 @@ async def _unhandled(_: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"detail": f"Internal error: {type(exc).__name__}: {exc}"})
 
 
+# Serve the solar twin dashboard
+SOLAR_DASHBOARD = Path(__file__).resolve().parents[2] / "rebat_solar" / "frontend" / "solar_twin_dashboard.html"
+
+@app.get("/solar", include_in_schema=False)
+@app.get("/solar-twin", include_in_schema=False)
+def get_solar_dashboard():
+    if SOLAR_DASHBOARD.exists():
+        return FileResponse(SOLAR_DASHBOARD)
+    return JSONResponse(status_code=404, content={"detail": "Solar dashboard file not found"})
+
 # Serve the built frontend (frontend/dist) when present, so one process runs everything.
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if DIST.exists():
@@ -75,5 +87,9 @@ if DIST.exists():
 
     @app.get("/{path:path}", include_in_schema=False)
     def spa(path: str):
+        if path in ("solar", "solar-twin"):
+            if SOLAR_DASHBOARD.exists():
+                return FileResponse(SOLAR_DASHBOARD)
         f = DIST / path
         return FileResponse(f if path and f.is_file() else DIST / "index.html")
+

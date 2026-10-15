@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
-import { Activity, Atom, Box, BatteryCharging, Brain, Fingerprint, FileSearch, FlaskConical, GaugeCircle, LayoutDashboard, Link2, Recycle, Route, Upload, Cpu } from "lucide-react";
+import { Activity, Atom, Box, BatteryCharging, Brain, Fingerprint, FileSearch, FlaskConical, GaugeCircle, LayoutDashboard, Link2, Recycle, Route, Upload, Cpu, Sun } from "lucide-react";
 import { useAnalysis } from "../lib/store";
 import { DataBadge, Disclaimer, SafetyBanner } from "./ui";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import ChatAssistant from "./ChatAssistant";
 
 const NAV = [
   { to: "/app/live", label: "Live ESP32", icon: Activity },
+  { to: "/app/solar", label: "Solar twin", icon: Sun, badge: "NEW" },
   { to: "/app/analyze", label: "Analyze battery", icon: Upload },
   { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/app/health", label: "Health & RUL", icon: GaugeCircle },
@@ -47,10 +48,11 @@ export default function Shell() {
       <aside className="border-b border-ink-700 bg-ink-950 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4"><Logo /></div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible" aria-label="Main">
-          {NAV.map(({ to, label, icon: Icon, end }) => (
+          {NAV.map(({ to, label, icon: Icon, end, badge }: any) => (
             <NavLink key={to} to={to} end={end}
               className={({ isActive }) => `flex shrink-0 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive ? "bg-ink-800 text-fog-100 shadow-[inset_2px_0_0_#B6F23A]" : "text-fog-400 hover:text-fog-100"}`}>
               <Icon className="h-4 w-4" /> {label}
+              {badge && <span className="ml-auto text-3xs font-mono font-semibold uppercase bg-volt/15 text-volt px-1.5 py-0.5 rounded border border-volt/30">{badge}</span>}
             </NavLink>
           ))}
         </nav>

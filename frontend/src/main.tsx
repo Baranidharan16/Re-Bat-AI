@@ -19,6 +19,7 @@ import Circular from "./pages/Circular";
 import Minerals from "./pages/Minerals";
 import Forensics from "./pages/Forensics";
 import Explorer from "./pages/Explorer";
+import Solar from "./pages/Solar";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/" element={<Landing />} />
           <Route path="/app" element={<Shell />}>
             <Route index element={<Overview />} />
+            <Route path="solar" element={<Solar />} />
             <Route path="analyze" element={<Analyze />} />
             <Route path="live" element={<Live />} />
             <Route path="health" element={<Health />} />
